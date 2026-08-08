@@ -1,0 +1,14 @@
+/* src/styles.css */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #121212; /* Un fondo oscuro elegante para el espacio sobrante */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'ubuntu';
+ 
+}
+
+
+

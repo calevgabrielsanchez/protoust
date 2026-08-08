@@ -1,0 +1,21 @@
+/* You can add global styles to this file, and also import other style files */
+
+@font-face {
+  font-family: 'ubuntu';
+  src: url('/public/Ubuntu.ttf') format('ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+html, body {
+            background-color: #222226 !important ;
+            font-family: 'ubuntu', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Ocupa exactamente el alto de la ventana */
+            width: 100vw; 
+            margin: 0 !important; /* Asegura eliminar márgenes fantasmas del navegador */
+            padding: 0 !important;
+            overflow: hidden; /* Evita cualquier scroll global */
+        }
+

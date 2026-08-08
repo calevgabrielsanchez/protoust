@@ -1,0 +1,496 @@
+<body>
+
+    <div class="app-container">
+
+        <header class="header">
+            <div class="header-btn-left">P</div>
+            <div class="header-title">PROTOUST</div>
+            <div class="header-btn-right">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="control-panel">
+                <div class="row-universo">
+                    <label>Menu:</label>
+                    <div class="btn-group-four">
+                        <button class="square-btn light-txt" (click)="abrirEditarText()"><fa-icon size="2x" [icon]="faFileHalfDashed"></fa-icon></button>
+                        <button class="square-btn light-txt" (click)="onGuardarCambios()"><fa-icon size="2x" [icon]="faSave"></fa-icon></button>
+                        <button class="square-btn light-txt" (click)="onMundoHistoria('mundo')"><fa-icon size="2x" [icon]="faEarthAmericas"></fa-icon></button>
+                        <button class="square-btn light-txt" (click)="onMundoHistoria('historia')"><fa-icon size="2x" [icon]="faScroll"></fa-icon></button>
+                    </div>
+                </div>
+
+                <div class="control-panel-v2">
+
+                    <div class="section-block">
+                        <div class="row-full-select">
+                            <label>Universo:</label>
+                            <div class="custom-select">
+                                <select name="universo" id="universo" (change)="onSelectUniverso($event)">
+                                    <option [value]="0">Elige...</option>
+                                    @for (universo of (dbService.universo$ | async); track universo.id) {
+                                    <option [value]='universo.id'>{{universo.nombre}}</option>
+                                    } @empty {
+                                    <option [value]='0'>-Vacio-</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-actions">
+                                <button class="square-btn light-txt" (click)="onNuevoUniverso()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onEliminarUniverso()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
+                                <button class="square-btn light-txt"
+                                   ><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                <button class="square-btn light-txt"
+                                    ><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mundo" [class.hidden]="!mundo">
+                    <div class="control-panel-v2">
+
+                        <div class="section-block">
+                            <div class="row-full-select">
+                                <label for="opciones">Mundo:</label>
+                                <div class="custom-select">
+                                    <select name="mundo" id="mundo" (change)="onSelectMundo($event)">
+                                        <option value='0'>Elige...</option>
+                                        @for (mundo of (mundosFiltrados); track mundo.id) {
+                                        <option value='{{mundo.id}}'>{{mundo.nombre}} @if (mundo._deleted) { - }</option>
+                                        } @empty {
+                                        <option value='0'>-Vacio-</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-actions">
+                                    <button class="square-btn light-txt" (click)="onNuevoMundo()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onEliminarMundo()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
+                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                </div>
+                            </div>
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Diferente</label>
+                                    <textarea [(ngModel)]="selectMundo.diferente" #queDiferente></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Funciona</label>
+                                    <textarea [(ngModel)]="selectMundo.funciona"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Reglas</label>
+                                    <textarea [(ngModel)]="selectMundo.reglas"></textarea>
+                                </div>
+                            </div>
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Geografia</label>
+                                    <textarea [(ngModel)]="selectMundo.geografia"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Historia</label>
+                                    <textarea [(ngModel)]="selectMundo.historia"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>EventEspeci</label>
+                                    <textarea [(ngModel)]="selectMundo.eventEspeciales"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="row-full-select">
+                                <label>Culturas:</label>
+                                <div class="custom-select">
+                                    <select name="culturas" id="culturas" (change)="onSelectCultura($event)">
+                                        <option value='0'>Elige...</option>
+                                        @for (cultura of (culturasFiltrados); track cultura.id) {
+                                        <option value='{{cultura.id}}'>{{cultura.nombre}}</option>
+                                        } @empty {
+                                        <option value='0'>-Vacio-</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-actions">
+                                    <button class="square-btn light-txt" (click)="onNuevocultura()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onEliminarCultura()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
+                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                </div>
+                            </div>
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Costumbres</label>
+                                    <textarea [(ngModel)]="selectCultura.costumbres"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Religiones</label>
+                                    <textarea [(ngModel)]="selectCultura.religiones"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Idioma</label>
+                                    <textarea [(ngModel)]="selectCultura.idioma"></textarea>
+                                </div>
+                            </div>
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Vestimenta</label>
+                                    <textarea [(ngModel)]="selectCultura.vestimenta"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Comida</label>
+                                    <textarea [(ngModel)]="selectCultura.comida"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Valores</label>
+                                    <textarea [(ngModel)]="selectCultura.valores"></textarea>
+                                </div>
+                            </div>
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Castas</label>
+                                    <textarea [(ngModel)]="selectCultura.castas"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Armas</label>
+                                    <textarea [(ngModel)]="selectCultura.armas"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Festivos:</label>
+                                    <textarea [(ngModel)]="selectCultura.diasFestivos"></textarea>
+                                </div>
+                            </div>
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Historia</label>
+                                    <textarea [(ngModel)]="selectCultura.historia"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Gobierno</label>
+                                    <textarea [(ngModel)]="selectCultura.sistemaPolitico"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Poderes</label>
+                                    <textarea [(ngModel)]="selectCultura.comoObtienePoder"></textarea>
+                                </div>
+                            </div>
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Dinero</label>
+                                    <textarea [(ngModel)]="selectCultura.dinero"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Recursos</label>
+                                    <textarea [(ngModel)]="selectCultura.recursos"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Viajan</label>
+                                    <textarea [(ngModel)]="selectCultura.viajan"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="row-full-select">
+                                <label>Personajes:</label>
+                                <div class="custom-select">
+                                    <select name="personajes" id="personajes" (change)="onSelectPersonaje($event)">
+                                        <option value='0'>Elige...</option>
+                                        @for (personaje of (persoanjesFiltrados); track personaje.id) {
+                                        <option value='{{personaje.id}}'>{{personaje.nombre}}</option>
+                                        } @empty {
+                                        <option value='0'>-Vacio-</option>
+                                        }
+                                    </select>
+
+                                </div>
+                                <div class="col-actions">
+                                    <button class="square-btn light-txt" (click)="onNuevoPersonaje()"><fa-icon size="2x" [icon]="faBaby"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onEliminarPersonaje()"><fa-icon size="2x" [icon]="faSkullCrossbones"></fa-icon></button>
+                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                </div>
+                            </div>
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Datos</label>
+                                    <textarea [(ngModel)]="selectPersonaje.personales"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Enfermedad</label>
+                                    <textarea [(ngModel)]="selectPersonaje.enfermedad"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Traumas</label>
+                                    <textarea [(ngModel)]="selectPersonaje.traumas"></textarea>
+                                </div>
+                            </div>
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Pasado</label>
+                                    <textarea [(ngModel)]="selectPersonaje.pasado"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Presente</label>
+                                    <textarea [(ngModel)]="selectPersonaje.presente"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Futuro</label>
+                                    <textarea [(ngModel)]="selectPersonaje.futuro"></textarea>
+                                </div>
+                            </div>
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Personalidad</label>
+                                    <textarea [(ngModel)]="selectPersonaje.personalidad"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Seductor</label>
+                                    <textarea [(ngModel)]="selectPersonaje.seductor"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Hobbie</label>
+                                    <textarea [(ngModel)]="selectPersonaje.hobbie"></textarea>
+                                </div>
+                            </div>
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Gusta</label>
+                                    <textarea [(ngModel)]="selectPersonaje.amor"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Disgusta</label>
+                                    <textarea [(ngModel)]="selectPersonaje.odio"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Ignora</label>
+                                    <textarea [(ngModel)]="selectPersonaje.ignora"></textarea>
+                                </div>
+                            </div>
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Familia</label>
+                                    <textarea [(ngModel)]="selectPersonaje.familia"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Amigos</label>
+                                    <textarea [(ngModel)]="selectPersonaje.amigos"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Parejas</label>
+                                    <textarea [(ngModel)]="selectPersonaje.parejas"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="row-full-select">
+                                <label>Creaturas:</label>
+                                <div class="custom-select">
+                                    <select name="creaturas" id="creaturas" (change)="onSelectCreatura($event)">
+                                        <option value='0'>Elige...</option>
+                                        @for (creatura of (creaturasFiltrados); track creatura.id) {
+                                        <option value='{{creatura.id}}'>{{creatura.nombre}}</option>
+                                        } @empty {
+                                        <option value='0'>-Vacio-</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-actions">
+                                    <button class="square-btn light-txt" (click)="onNuevaCreatura()"><fa-icon size="2x" [icon]="faDragon"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onEliminarCreatura()"><fa-icon size="2x" [icon]="faMeteor"></fa-icon></button>
+                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                </div>
+                            </div>
+
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Rol</label>
+                                    <textarea [(ngModel)]="selectCreatura.rol"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Hábitat</label>
+                                    <textarea [(ngModel)]="selectCreatura.habitat"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Forma</label>
+                                    <textarea [(ngModel)]="selectCreatura.forma"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Habilidades</label>
+                                    <textarea [(ngModel)]="selectCreatura.habilidades"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Comunicación</label>
+                                    <textarea [(ngModel)]="selectCreatura.comunica"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Reproducción</label>
+                                    <textarea [(ngModel)]="selectCreatura.reproduce"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Come</label>
+                                    <textarea [(ngModel)]="selectCreatura.come"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Importante</label>
+                                    <textarea [(ngModel)]="selectCreatura.importantePara"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Familia</label>
+                                    <textarea [(ngModel)]="selectCreatura.familia"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Comportamiento</label>
+                                    <textarea [(ngModel)]="selectCreatura.comportamiento"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Ciclo</label>
+                                    <textarea [(ngModel)]="selectCreatura.cicloVida"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Smart</label>
+                                    <textarea [(ngModel)]="selectCreatura.inteligencia"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid-three-cols">
+                                <div class="input-cell">
+                                    <label>Ecosistema</label>
+                                    <textarea [(ngModel)]="selectCreatura.ecosistema"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Curiosidad</label>
+                                    <textarea [(ngModel)]="selectCreatura.curiocidad"></textarea>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Sociedad</label>
+                                    <textarea [(ngModel)]="selectCreatura.sociedad"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <div id="historia" [class.hidden]="mundo">
+                    <div class="section-block">
+                        <div class="row-full-select">
+                            <label>Saga:</label>
+                            <div class="custom-select">
+                                <select name="saga" id="saga" (change)="onSelectSaga($event)">
+                                    <option value='0'>Elige...</option>
+                                    @for (saga of (sagaFiltrados); track saga.id) {
+                                    <option value='{{saga.id}}'>{{saga.nombre}}</option>
+                                    } @empty {
+                                    <option value='0'>-Vacio-</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-actions">
+                                <button class="square-btn light-txt" (click)="onNuevoSaga()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onEliminarSaga()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
+                                <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="section-block">
+                        <div class="row-full-select">
+                            <label>Tomo:</label>
+                            <div class="custom-select">
+                                <select name="tomo" id="tomo" (change)="onSelectTomo($event)">
+                                    <option value='0'>Elige...</option>
+                                    @for (tomo of (tomoFiltrados); track tomo.id) {
+                                    <option value='{{tomo.id}}'>{{tomo.nombre}}</option>
+                                    } @empty {
+                                    <option value='0'>-Vacio-</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-actions">
+                                <button class="square-btn light-txt" (click)="onNuevoTomo()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onEliminarTomo()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
+                                <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="index-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-num">#</th>
+                                    <th class="col-indice">Indice</th>
+                                    <th class="col-control">Control</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (indice of (indiceFiltrados); track indice.id; let i = $index){
+                                <tr>
+                                    <td class="col-num">{{i + 1}}</td>
+                                    <td class="col-text">{{indice.nombre}}</td>
+                                    <td class="col-actions">
+                                        <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                        <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                        <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faPenFancy"></fa-icon></button>
+                                        <button class="square-btn light-txt"
+                                            (click)="onAddContenidoIndice(indice.id, indice.nombre,i)"><fa-icon size="2x" [icon]="faFileHalfDashed"></fa-icon></button>
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2" class="col-text">Control</td>
+                                    <td class="col-actions">
+                                        <button class="square-btn light-txt"
+                                            (click)="onNuevoIndice()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
+                                        <button class="square-btn light-txt" (click)="onEliminarIndice()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </main>
+
+        <footer class="footer">
+            <button class="footer-btn">Creatividad</button>
+            <button class="footer-btn">CaleVRije</button>
+            <button class="footer-btn">Personas</button>
+        </footer>
+
+    </div>
+
+    <script src="./js/jquery-4.0.0.min.js.js"></script>
+    <script src="./js/funciones.js"></script>
+
+    @if (mostrarTextPlus) {
+    <app-text-plus [(textoContenido)]="textoAEditar" (cerrar)="cerrar()" (aceptar)="aceptar()"></app-text-plus>
+    }
+
+</body>

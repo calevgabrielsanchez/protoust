@@ -1,0 +1,181 @@
+:host {
+  position: fixed;       /* Lo fija en la pantalla sin importar el scroll */
+  top: 50%;              /* Lo centra verticalmente */
+  left: 50%;             /* Lo centra horizontalmente */
+  transform: translate(-50%, -50%); /* Ajuste perfecto para centrar el modal */
+  
+  width: 90vw;           /* Ancho de la ventana (80% del ancho de pantalla) */
+  height: 90vh;          /* Alto de la ventana (60% del alto de pantalla) */
+  
+  z-index: 9999;         /* Lo coloca por encima de cualquier otro elemento */
+  
+  /* Estilos visuales de la ventana */
+  background-color: #1a1a1a;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
+  padding: 5px;
+  box-sizing: border-box;
+   border: 1px solid #009dff !important;
+   border-top-width: 5px !important;
+   
+}
+
+:host ::ng-deep div {
+  font-size: 15px;
+}
+
+:host ::ng-deep div > .red {
+  color: indianred;
+  padding: 10px;
+}
+
+:host ::ng-deep div > .yellow {
+  color: bisque;
+  padding: 10px;
+}
+
+:host ::ng-deep div > .green {
+  color: aquamarine;
+  padding: 10px;
+}
+
+:host ::ng-deep div > .blue {
+  color: aqua;
+  padding: 10px;
+}
+
+:host ::ng-deep div > .grey {
+  color: #cecece;
+  text-decoration: underline;
+  
+  padding: 10px;
+}
+
+:host ::ng-deep div > a {
+    padding: 5px 10px 5px 10px !important;
+    margin-top: 10px !important;
+  color: #009dff;
+}
+
+:host ::ng-deep div > b {
+   font-size: 20px;
+}
+
+:host ::ng-deep div > em {
+    font-size: 17px;
+}
+
+:host ::ng-deep div > dl {
+  display: inline-block;
+}
+
+:host ::ng-deep div > dl >.dt {
+  font-weight: 700;
+  color: #bfd3ff; 
+  background-color: #31252d;
+  padding: 5px 8px;
+  border-radius: 8px 8px 0 0;
+  margin-top: 5px;
+}
+
+:host ::ng-deep div > dl > .dd {
+  margin: 0;
+  padding: 5px 15px 5px 15px;
+  background-color: #4b4b4b;
+  border: 1px solid #303030;
+  border-top: none;
+ 
+  color: #ccffbf;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+}
+
+/* El textarea ahora se adapta al nuevo tamaño de la ventana */
+.cuadro-completo {
+  width: 100%;
+  height: 94%;
+  border: 1px solid #44e233;
+  border-radius: 4px;
+  outline: none;
+  resize: none;
+  box-sizing: border-box;
+  padding: 13px 5px 0 18px;
+}
+
+button{
+    background-color: inherit;
+    border: none;
+    cursor: pointer;
+}
+
+button:active {
+    box-shadow: 0 0 3px darkblue inset;
+}
+
+
+input,
+select,
+textarea,
+input {
+    border: 1px solid #a62aa9 !important;
+    color: #fff !important;
+    background-color: #222226 !important;
+    border-radius: 3px;
+    font-family: 'ubuntu', sans-serif;
+    font-size: 15px;
+}
+
+.hide{
+    display: none;
+}
+
+.pergamino{
+    color: #ccc;
+}
+b{
+    color: #a62aa9 !important;
+}
+.pergamino>b{
+    color: #a62aa9 !important;
+}
+
+/*Estilos barra*/
+/* Contenedor principal de los botones */
+.barra-herramientas {
+  display: flex;
+  justify-content: space-between; /* Empuja el grupo izquierdo a la izq, el centro al medio y el derecho a la der */
+  align-items: center;            /* Centra verticalmente todos los botones */
+  width: 100%;
+  padding: 8px 12px;              /* Espaciado interno para que no peguen al borde azul */
+  box-sizing: border-box;
+}
+
+/* Espaciado interno opcional para los dos primeros botones del lado izquierdo */
+.grupo-izquierdo {
+  display: flex;
+  gap: 8px; /* Separa el pergamino del icono de fuego */
+}
+
+.grupo-izquierdo>button {
+  color: #009dff;
+  margin: 0 5px; /* Espaciado horizontal entre los botones del grupo central */
+}
+
+/* Asegura que el grupo del centro esté perfectamente alineado */
+.grupo-centro {
+  display: flex;
+  justify-content: center;
+}
+
+.grupo-centro>button {
+  color:#44e233;
+}
+
+/* Asegura que el grupo derecho empuje todo a la esquina */
+.grupo-derecho {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.grupo-derecho>button{
+  color: #cb00b0;
+}
