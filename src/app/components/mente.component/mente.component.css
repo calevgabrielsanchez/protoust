@@ -334,6 +334,6 @@ textarea:focus {
 
 @media screen and (width <=768px) {
     #mundo {
-        /*dff*/
+        width: 79vw;
     }
 }

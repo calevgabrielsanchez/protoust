@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { createRxDatabase, RxDatabase, RxCollection, removeRxDatabase } from 'rxdb';
+import { createRxDatabase, RxDatabase, RxCollection } from 'rxdb';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-import { replicateRxCollection } from 'rxdb/plugins/replication';
+import { replicateRxCollection, RxReplicationState } from 'rxdb/plugins/replication';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import {
     UNIVERSO_SCHEMA, MUNDO_SCHEMA, CULTURA_SCHEMA, PERSONAJE_SCHEMA, CREATURA_SCHEMA,
@@ -25,8 +25,22 @@ export class RxdbService {
     private supabase: SupabaseClient;
     private db!: RxDatabase;
 
-    private version: string = 'v34'
-    private versionBase: string = 'v34'
+    private version: string = 'v35';
+    private versionBase: string = 'v35';
+
+    private dbReady!: Promise<void>;
+
+    private replicas: {
+        universo?: RxReplicationState<Universo, any>;
+        mundo?: RxReplicationState<Mundo, any>;
+        cultura?: RxReplicationState<Cultura, any>;
+        personaje?: RxReplicationState<Personaje, any>;
+        creatura?: RxReplicationState<Creatura, any>;
+        saga?: RxReplicationState<Saga, any>;
+        tomo?: RxReplicationState<Tomo, any>;
+        indice?: RxReplicationState<Indice, any>;
+        contenidoIndice?: RxReplicationState<ContenidoIndice, any>;
+    } = {};
 
     // Canales reactivos para que los componentes de Angular escuchen los datos
     public universo$ = new BehaviorSubject<Universo[]>([]);
@@ -64,13 +78,14 @@ export class RxdbService {
                 }
             }
         );
-        this.initDatabase();
+        this.dbReady = this.initDatabase();
     }
 
     private async initDatabase() {
 
-        await removeRxDatabase('protoust_sqlite_db_' + this.versionBase, getRxStorageDexie());
-
+        // No borramos la base local cada vez que se inicia la app.
+        // Eso hacía que todo se vaciara automáticamente al arrancar.
+        // Si quieres reset manual, hazlo desde un método explícito. 
 
         // 1. Crear base de datos local
         this.db = await createRxDatabase({
@@ -93,75 +108,358 @@ export class RxdbService {
 
         // 3. Suscribirse a los datos locales activos (mapeando a _deleted nativo de RxDB)
         this.colecciones.universo.find({ selector: { _deleted: false } }).$.subscribe(docs => {
-            this.universo$.next(docs.map(d => d.toJSON() as Universo));
+            const data = docs.map(d => d.toJSON() as Universo);
+            this.universo$.next(data);
         });
 
         this.colecciones.mundo.find({ selector: { _deleted: false } }).$.subscribe(docs => {
-            this.mundo$.next(docs.map(d => d.toJSON() as Mundo));
+            const data = docs.map(d => d.toJSON() as Mundo);
+            this.mundo$.next(data);
         });
 
         this.colecciones.cultura.find({ selector: { _deleted: false } }).$.subscribe(docs => {
-            this.cultura$.next(docs.map(d => d.toJSON() as Cultura));
+            const data = docs.map(d => d.toJSON() as Cultura);
+            this.cultura$.next(data);
         });
 
         this.colecciones.personaje.find({ selector: { _deleted: false } }).$.subscribe(docs => {
-            this.personaje$.next(docs.map(d => d.toJSON() as Personaje));
+            const data = docs.map(d => d.toJSON() as Personaje);
+            this.personaje$.next(data);
         });
 
         this.colecciones.creatura.find({ selector: { _deleted: false } }).$.subscribe(docs => {
-            this.creatura$.next(docs.map(d => d.toJSON() as Creatura));
+            const data = docs.map(d => d.toJSON() as Creatura);
+            this.creatura$.next(data);
         });
 
         this.colecciones.saga.find({ selector: { _deleted: false } }).$.subscribe(docs => {
-            this.saga$.next(docs.map(d => d.toJSON() as Saga));
+            const data = docs.map(d => d.toJSON() as Saga);
+            this.saga$.next(data);
         });
 
         this.colecciones.tomo.find({ selector: { _deleted: false } }).$.subscribe(docs => {
-            this.tomo$.next(docs.map(d => d.toJSON() as Tomo));
+            const data = docs.map(d => d.toJSON() as Tomo);
+            this.tomo$.next(data);
         });
 
         this.colecciones.indice.find({ selector: { _deleted: false } }).$.subscribe(docs => {
-            this.indice$.next(docs.map(d => d.toJSON() as Indice));
+            const data = docs.map(d => d.toJSON() as Indice);
+            this.indice$.next(data);
         });
 
         this.colecciones.contenidoIndice.find({ selector: { _deleted: false } }).$.subscribe(docs => {
-            this.contenidoIndice$.next(docs.map(d => d.toJSON() as ContenidoIndice));
+            const data = docs.map(d => d.toJSON() as ContenidoIndice);
+            this.contenidoIndice$.next(data);
         });
-        /*
-                this.sincronizarUniversos(colecciones.universo);
-                this.sincronizarMundos(colecciones.mundo);
-                this.sincronizarCultura(colecciones.cultura);
-                this.sincronizarPersonaje(colecciones.personaje);
-                this.sincronizarCreatura(colecciones.creatura);
-                this.sincronizarSaga(colecciones.saga);
-                this.sincronizarTomo(colecciones.tomo);
-                this.sincronizarIndice(colecciones.indice);
-                this.sincronizarContenidoIndice(colecciones.contenidoIndice); 
-                */
-               this.subirASupabase();
+
+        this.inicializarReplicacionSupabase();
+        await this.verificarConexionLocal();
+    }
+
+    private inicializarReplicacionSupabase() {
+        this.sincronizarUniversos(this.colecciones.universo);
+        this.sincronizarMundos(this.colecciones.mundo);
+        this.sincronizarCultura(this.colecciones.cultura);
+        this.sincronizarPersonaje(this.colecciones.personaje);
+        this.sincronizarCreatura(this.colecciones.creatura);
+        this.sincronizarSaga(this.colecciones.saga);
+        this.sincronizarTomo(this.colecciones.tomo);
+        this.sincronizarIndice(this.colecciones.indice);
+        this.sincronizarContenidoIndice(this.colecciones.contenidoIndice);
+    }
+
+    async verificarConexionLocal() {
+        if (!this.db) {
+            console.warn('RxDB local aún no está inicializada.');
+            return false;
+        }
+
+        try {
+            const info = await this.db.name; // Solo para verificar que la base de datos está accesible
+            console.log('DB local creada:', info);
+            console.log('Colecciones de RxDB:', Object.keys(this.db.collections));
+            return true;
+        } catch (error) {
+            console.error('Error al consultar la DB local:', error);
+            return false;
+        }
+    }
+
+    async verificarConexionSupabase() {
+        try {
+            const { data, error } = await this.supabase.from('universo').select('*').limit(1);
+            console.log('Verificación Supabase:', { data, error });
+
+            if (error) {
+                console.error('Supabase no respondió correctamente:', error);
+                return { ok: false, data: null, error };
+            }
+
+            return { ok: true, data, error: null };
+        } catch (error) {
+            console.error('Error al conectar con Supabase:', error);
+            return { ok: false, data: null, error };
+        }
     }
 
     async subirASupabase() {
+        console.warn('Sincronización automática desactivada. Usa sincronizarConSupabase() para subir el estado local al backend.');
+    }
+
+    async sincronizarConSupabase() {
         console.log('Iniciando sincronización manual hacia Supabase...');
 
-        try {
-            // Ejecutamos tus funciones de sincronización existentes una por una a demanda
-            this.sincronizarUniversos(this.colecciones.universo);
-            this.sincronizarMundos(this.colecciones.mundo);
-            this.sincronizarCultura(this.colecciones.cultura);
-            this.sincronizarPersonaje(this.colecciones.personaje);
-            this.sincronizarCreatura(this.colecciones.creatura);
-            this.sincronizarSaga(this.colecciones.saga);
-            this.sincronizarTomo(this.colecciones.tomo);
-            this.sincronizarIndice(this.colecciones.indice);
-            this.sincronizarContenidoIndice(this.colecciones.contenidoIndice);
+        await this.dbReady;
 
+        const conexion = await this.verificarConexionSupabase();
+        if (!conexion.ok) {
+            alert('No se pudo conectar a Supabase. Revisa la tabla y la configuración.');
+            return false;
+        }
+
+        try {
+            await this.asegurarReplicas();
+            await Promise.all(Object.values(this.replicas).map(estado => this.esperarSincronizacion(estado)));
             console.log('¡Sincronización completada con éxito!');
-            //alert('Datos respaldados en Supabase correctamente.');
+            return true;
         } catch (error) {
             console.error('Error al sincronizar:', error);
             alert('Hubo un problema al subir los datos.');
+            return false;
         }
+    }
+
+    private async asegurarReplicas() {
+        const reconstruir = (estado?: RxReplicationState<any, any>): boolean =>
+            !estado || estado.isStopped();
+
+        if (reconstruir(this.replicas.universo)) {
+            this.replicas.universo = this.sincronizarUniversos(this.colecciones.universo);
+        }
+        if (reconstruir(this.replicas.mundo)) {
+            this.replicas.mundo = this.sincronizarMundos(this.colecciones.mundo);
+        }
+        if (reconstruir(this.replicas.cultura)) {
+            this.replicas.cultura = this.sincronizarCultura(this.colecciones.cultura);
+        }
+        if (reconstruir(this.replicas.personaje)) {
+            this.replicas.personaje = this.sincronizarPersonaje(this.colecciones.personaje);
+        }
+        if (reconstruir(this.replicas.creatura)) {
+            this.replicas.creatura = this.sincronizarCreatura(this.colecciones.creatura);
+        }
+        if (reconstruir(this.replicas.saga)) {
+            this.replicas.saga = this.sincronizarSaga(this.colecciones.saga);
+        }
+        if (reconstruir(this.replicas.tomo)) {
+            this.replicas.tomo = this.sincronizarTomo(this.colecciones.tomo);
+        }
+        if (reconstruir(this.replicas.indice)) {
+            this.replicas.indice = this.sincronizarIndice(this.colecciones.indice);
+        }
+        if (reconstruir(this.replicas.contenidoIndice)) {
+            this.replicas.contenidoIndice = this.sincronizarContenidoIndice(this.colecciones.contenidoIndice);
+        }
+    }
+
+    private async esperarSincronizacion(estado: RxReplicationState<any, any>): Promise<void> {
+        await estado.start();
+        await Promise.race([
+            estado.awaitInSync(),
+            new Promise<void>((_, reject) =>
+                setTimeout(() => reject(new Error('Timeout de sincronización')), 60000)
+            )
+        ]);
+    }
+
+    async importarTablasATrxDB(tablas: Record<string, object[]>): Promise<void> {
+        await this.dbReady;
+        for (const [nombre, filas] of Object.entries(tablas)) {
+            const coleccion = this.colecciones[nombre as keyof typeof this.colecciones];
+            if (!coleccion || !filas || filas.length === 0) {
+                continue;
+            }
+            await coleccion.bulkUpsert(filas as any[]);
+        }
+    }
+
+    async sincronizarDesdeSupabase(): Promise<Record<string, any[]> | null> {
+        console.log('Descargando datos desde Supabase hacia CSV...');
+
+        await this.dbReady;
+
+        const conexion = await this.verificarConexionSupabase();
+        if (!conexion.ok) {
+            alert('No se pudo conectar a Supabase. Revisa la tabla y la configuración.');
+            return null;
+        }
+
+        try {
+            const [universos, mundos, culturas, personajes, creaturas, sagas, tomos, indices, contenidos] = await Promise.all([
+                this.traerRegistros('universo', r => ({
+                    id: r.id,
+                    nombre: r.nombre,
+                    detalles: r.detalles,
+                    imagen: r.imagen,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
+                })),
+                this.traerRegistros('mundo', r => ({
+                    id: r.id,
+                    universoId: r.universo_id,
+                    nombre: r.nombre,
+                    detalles: r.detalles,
+                    imagen: r.imagen,
+                    diferente: r.diferente,
+                    funciona: r.funciona,
+                    reglas: r.reglas,
+                    geografia: r.geografia,
+                    historia: r.historia,
+                    eventEspeciales: r.event_especiales,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
+                })),
+                this.traerRegistros('cultura', r => ({
+                    id: r.id,
+                    mundoId: r.mundo_id,
+                    nombre: r.nombre,
+                    detalles: r.detalles,
+                    imagen: r.imagen,
+                    costumbres: r.costumbres,
+                    religiones: r.religiones,
+                    idioma: r.idioma,
+                    vestimenta: r.vestimenta,
+                    comida: r.comida,
+                    valores: r.valores,
+                    castas: r.castas,
+                    armas: r.armas,
+                    diasFestivos: r.dias_festivos,
+                    historia: r.historia,
+                    sistemaPolitico: r.sistema_politico,
+                    comoObtienePoder: r.como_obtiene_poder,
+                    dinero: r.dinero,
+                    recursos: r.recursos,
+                    viajan: r.viajan,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
+                })),
+                this.traerRegistros('personaje', r => ({
+                    id: r.id,
+                    culturaId: r.cultura_id,
+                    nombre: r.nombre,
+                    detalles: r.detalles,
+                    imagen: r.imagen,
+                    personales: r.personales,
+                    enfermedad: r.enfermedad,
+                    traumas: r.traumas,
+                    pasado: r.pasado,
+                    presente: r.presente,
+                    futuro: r.futuro,
+                    personalidad: r.personalidad,
+                    seductor: r.seductor,
+                    hobbie: r.hobbie,
+                    amor: r.amor,
+                    odio: r.odio,
+                    ignora: r.ignora,
+                    familia: r.familia,
+                    amigos: r.amigos,
+                    parejas: r.parejas,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
+                })),
+                this.traerRegistros('creatura', r => ({
+                    id: r.id,
+                    mundoId: r.mundo_id,
+                    nombre: r.nombre,
+                    detalles: r.detalles,
+                    imagen: r.imagen,
+                    rol: r.rol,
+                    habitat: r.habitat,
+                    forma: r.forma,
+                    habilidades: r.habilidades,
+                    comunica: r.comunica,
+                    reproduce: r.reproduce,
+                    come: r.come,
+                    importantePara: r.importante_para,
+                    familia: r.familia,
+                    comportamiento: r.comportamiento,
+                    cicloVida: r.ciclo_vida,
+                    inteligencia: r.inteligencia,
+                    ecosistema: r.ecosistema,
+                    curiocidad: r.curiocidad,
+                    sociedad: r.sociedad,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
+                })),
+                this.traerRegistros('saga', r => ({
+                    id: r.id,
+                    universoId: r.universo_id,
+                    nombre: r.nombre,
+                    detalles: r.detalles,
+                    imagen: r.imagen,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
+                })),
+                this.traerRegistros('tomo', r => ({
+                    id: r.id,
+                    sagaId: r.saga_id,
+                    nombre: r.nombre,
+                    detalles: r.detalles,
+                    imagen: r.imagen,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
+                })),
+                this.traerRegistros('indice', r => ({
+                    id: r.id,
+                    tomoId: r.tomo_id,
+                    nombre: r.nombre,
+                    detalles: r.detalles,
+                    imagen: r.imagen,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
+                })),
+                this.traerRegistros('contenido_indice', r => ({
+                    id: r.id,
+                    indiceId: r.indice_id,
+                    contenido: r.contenido,
+                    indice: r.indice,
+                    nombre: r.nombre,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
+                }))
+            ]);
+
+            return {
+                universo: universos,
+                mundo: mundos,
+                cultura: culturas,
+                personaje: personajes,
+                creatura: creaturas,
+                saga: sagas,
+                tomo: tomos,
+                indice: indices,
+                contenidoIndice: contenidos
+            };
+        } catch (error) {
+            console.error('Error al descargar desde Supabase:', error);
+            alert('Hubo un problema al descargar los datos.');
+            return null;
+        }
+    }
+
+    private async traerRegistros<T>(tabla: string, mapear: (fila: any) => T): Promise<T[]> {
+        const { data, error } = await this.supabase
+            .from(tabla)
+            .select('*')
+            .order('updated_at', { ascending: true });
+
+        if (error) {
+            throw error;
+        }
+
+        return (data || [])
+            .filter(r => !r.is_deleted)
+            .map(mapear);
     }
 
     // --- MÉTODOS CRUD RELACIONALES ---
@@ -169,16 +467,27 @@ export class RxdbService {
     //***************************
     // *   Metodos de creacion **
     // ********** ***************/
-    async crearUniverso(nombre: string, detalles: string, imagen: string) {
+    async crearUniverso(id: string, nombre: string, detalles: string, imagen: string) {
         const ahora = Date.now();
-        await this.db['universo'].insert({
-            id: 'univ_' + ahora + '_' + Math.random().toString(36).substring(2, 5),
+        return await this.db['universo'].insert({
+            id: id,
             nombre: nombre.trim(),
             detalles: detalles.trim(),
             imagen: imagen.trim(),
             updatedAt: ahora,
             _deleted: false // RxDB requiere estrictamente usar el guion bajo
         });
+    }
+
+    // --- EDITAR UNIVERSO ---
+    async editarUniverso(id: string, camposAActualizar: Partial<Universo>) {
+        const documento = await this.db['universo'].findOne({ selector: { id } }).exec();
+        if (documento) {
+            await documento.patch({
+                ...camposAActualizar,
+                updatedAt: Date.now()
+            });
+        }
     }
 
     //Crud Mundo
@@ -272,7 +581,7 @@ export class RxdbService {
             updatedAt: ahora,
             _deleted: false
 
-        })
+        });
     }
 
     async editarCultura(id: string, camposAActualizar: Partial<Cultura>) {
@@ -336,7 +645,7 @@ export class RxdbService {
             updatedAt: ahora,
             _deleted: false
 
-        })
+        });
     }
 
     async editarCreatura(id: string, camposAActualizar: Partial<Creatura>) {
@@ -400,7 +709,7 @@ export class RxdbService {
             updatedAt: ahora,
             _deleted: false
 
-        })
+        });
     }
 
     async editarPersonaje(id: string, camposAActualizar: Partial<Personaje>) {
@@ -541,11 +850,12 @@ export class RxdbService {
      *   Sincronizaciones 
      * **********************/
     // --- SINCRONIZACIÓN DE UNIVERSOS ---
-    private sincronizarUniversos(coleccion: RxCollection<Universo>) {
+    private sincronizarUniversos(coleccion: RxCollection<Universo>): RxReplicationState<Universo, any> {
         const replica = replicateRxCollection<Universo, any>({
             collection: coleccion,
             replicationIdentifier: 'sync-universo-' + this.version,
-            live: true,
+            live: false,
+            autoStart: false,
             retryTime: 4000,
             push: {
                 handler: async (rows) => {
@@ -590,30 +900,21 @@ export class RxdbService {
             }
         });
 
-        window.addEventListener('online', async () => {
-            console.log('📶 Red detectada. Volviendo a sincronizar culturas con Supabase...');
-            try {
-                await replica.reSync();
-            } catch (error) {
-                console.error('Error durante la resincronización automática:', error);
-            }
-        });
-
-        window.addEventListener('offline', () => {
-            console.log('Conexión Wi-Fi/Datos perdida. Operando en modo local seguro.');
-        });
-
         replica.error$.subscribe(err => {
-            console.error('❌ Error crítico en replicación de Culturas:', err);
+            console.error('❌ Error crítico en replicación de Universos:', err);
         });
+
+        this.replicas.universo = replica;
+        return replica;
     }
 
     // --- SINCRONIZACIÓN DE MUNDOS ---
-    private sincronizarMundos(coleccion: RxCollection<Mundo>) {
+    private sincronizarMundos(coleccion: RxCollection<Mundo>): RxReplicationState<Mundo, any> {
         const replica = replicateRxCollection<Mundo, any>({
             collection: coleccion,
             replicationIdentifier: 'sync-mundo-' + this.version,
-            live: true,
+            live: false,
+            autoStart: false,
             retryTime: 4000,
             push: {
                 handler: async (rows) => {
@@ -673,29 +974,20 @@ export class RxdbService {
             }
         });
 
-        window.addEventListener('online', async () => {
-            console.log('📶 Red detectada. Volviendo a sincronizar culturas con Supabase...');
-            try {
-                await replica.reSync();
-            } catch (error) {
-                console.error('Error durante la resincronización automática:', error);
-            }
-        });
-
-        window.addEventListener('offline', () => {
-            console.log('Conexión Wi-Fi/Datos perdida. Operando en modo local seguro.');
-        });
-
         replica.error$.subscribe(err => {
-            console.error('❌ Error crítico en replicación de Culturas:', err);
+            console.error('❌ Error crítico en replicación de Mundos:', err);
         });
+
+        this.replicas.mundo = replica;
+        return replica;
     }
 
-    private sincronizarCultura(coleccion: RxCollection<Cultura>) {
+    private sincronizarCultura(coleccion: RxCollection<Cultura>): RxReplicationState<Cultura, any> {
         const replica = replicateRxCollection<Cultura, any>({
             collection: coleccion,
             replicationIdentifier: 'sync-cultura-' + this.version,
-            live: true,
+            live: false,
+            autoStart: false,
             retryTime: 4000,
             push: {
                 handler: async (rows) => {
@@ -777,34 +1069,20 @@ export class RxdbService {
             }
         });
 
-        window.addEventListener('online', () => {
-            console.log('📶 Antena de red detectada. Esperando estabilización de señal...');
-
-            // Le damos 2 segundos al módem del celular para establecer la IP antes de empujar los datos
-            setTimeout(async () => {
-                try {
-                    console.log('🚀 Forzando empuje de datos históricos diferidos hacia Supabase...');
-                    await replica.reSync();
-                } catch (e) {
-                    console.error('El reintento automático falló por latencia:', e);
-                }
-            }, 2000);
-        });
-
-        window.addEventListener('offline', () => {
-            console.log('Conexión Wi-Fi/Datos perdida. Operando en modo local seguro.');
-        });
-
         replica.error$.subscribe(err => {
             console.error('❌ Error crítico en replicación de Culturas:', err);
         });
+
+        this.replicas.cultura = replica;
+        return replica;
     }
 
-    private sincronizarPersonaje(coleccion: RxCollection<Personaje>) {
+    private sincronizarPersonaje(coleccion: RxCollection<Personaje>): RxReplicationState<Personaje, any> {
         const replica = replicateRxCollection<Personaje, any>({
             collection: coleccion,
             replicationIdentifier: 'sync-personaje-' + this.version,
-            live: true,
+            live: false,
+            autoStart: false,
             retryTime: 4000,
             push: {
                 handler: async (rows) => {
@@ -886,30 +1164,21 @@ export class RxdbService {
             }
         });
 
-        window.addEventListener('online', async () => {
-            console.log('📶 Red detectada. Volviendo a sincronizar culturas con Supabase...');
-            try {
-                await replica.reSync();
-            } catch (error) {
-                console.error('Error durante la resincronización automática:', error);
-            }
-        });
-
-        window.addEventListener('offline', () => {
-            console.log('Conexión Wi-Fi/Datos perdida. Operando en modo local seguro.');
-        });
-
         replica.error$.subscribe(err => {
-            console.error('❌ Error crítico en replicación de Culturas:', err);
+            console.error('❌ Error crítico en replicación de Personajes:', err);
         });
+
+        this.replicas.personaje = replica;
+        return replica;
     }
 
     //Sincronizacion de creatura
-    private sincronizarCreatura(coleccion: RxCollection<Creatura>) {
+    private sincronizarCreatura(coleccion: RxCollection<Creatura>): RxReplicationState<Creatura, any> {
         const replica = replicateRxCollection<Creatura, any>({
             collection: coleccion,
             replicationIdentifier: 'sync-creatura-' + this.version,
-            live: true,
+            live: false,
+            autoStart: false,
             retryTime: 4000,
             push: {
                 handler: async (rows) => {
@@ -991,30 +1260,21 @@ export class RxdbService {
             }
         });
 
-        window.addEventListener('online', async () => {
-            console.log('📶 Red detectada. Volviendo a sincronizar culturas con Supabase...');
-            try {
-                await replica.reSync();
-            } catch (error) {
-                console.error('Error durante la resincronización automática:', error);
-            }
-        });
-
-        window.addEventListener('offline', () => {
-            console.log('Conexión Wi-Fi/Datos perdida. Operando en modo local seguro.');
-        });
-
         replica.error$.subscribe(err => {
-            console.error('❌ Error crítico en replicación de Culturas:', err);
+            console.error('❌ Error crítico en replicación de Creaturas:', err);
         });
+
+        this.replicas.creatura = replica;
+        return replica;
     }
 
     //Sincronizacion de saga
-    private sincronizarSaga(coleccion: RxCollection<Saga>) {
+    private sincronizarSaga(coleccion: RxCollection<Saga>): RxReplicationState<Saga, any> {
         const replica = replicateRxCollection<Saga, any>({
             collection: coleccion,
             replicationIdentifier: 'sync-saga-' + this.version,
-            live: true,
+            live: false,
+            autoStart: false,
             retryTime: 4000,
             push: {
                 handler: async (rows) => {
@@ -1064,30 +1324,21 @@ export class RxdbService {
             }
         });
 
-        window.addEventListener('online', async () => {
-            console.log('📶 Red detectada. Volviendo a sincronizar culturas con Supabase...');
-            try {
-                await replica.reSync();
-            } catch (error) {
-                console.error('Error durante la resincronización automática:', error);
-            }
-        });
-
-        window.addEventListener('offline', () => {
-            console.log('Conexión Wi-Fi/Datos perdida. Operando en modo local seguro.');
-        });
-
         replica.error$.subscribe(err => {
-            console.error('❌ Error crítico en replicación de Culturas:', err);
+            console.error('❌ Error crítico en replicación de Sagas:', err);
         });
+
+        this.replicas.saga = replica;
+        return replica;
     }
 
     //Sincronizacion de tomo
-    private sincronizarTomo(coleccion: RxCollection<Tomo>) {
+    private sincronizarTomo(coleccion: RxCollection<Tomo>): RxReplicationState<Tomo, any> {
         const replica = replicateRxCollection<Tomo, any>({
             collection: coleccion,
             replicationIdentifier: 'sync-tomo-' + this.version,
-            live: true,
+            live: false,
+            autoStart: false,
             retryTime: 4000,
             push: {
                 handler: async (rows) => {
@@ -1137,30 +1388,21 @@ export class RxdbService {
             }
         });
 
-        window.addEventListener('online', async () => {
-            console.log('📶 Red detectada. Volviendo a sincronizar culturas con Supabase...');
-            try {
-                await replica.reSync();
-            } catch (error) {
-                console.error('Error durante la resincronización automática:', error);
-            }
-        });
-
-        window.addEventListener('offline', () => {
-            console.log('Conexión Wi-Fi/Datos perdida. Operando en modo local seguro.');
-        });
-
         replica.error$.subscribe(err => {
-            console.error('❌ Error crítico en replicación de Culturas:', err);
+            console.error('❌ Error crítico en replicación de Tomos:', err);
         });
+
+        this.replicas.tomo = replica;
+        return replica;
     }
 
     //Sincronizacion de indice
-    private sincronizarIndice(coleccion: RxCollection<Indice>) {
+    private sincronizarIndice(coleccion: RxCollection<Indice>): RxReplicationState<Indice, any> {
         const replica = replicateRxCollection<Indice, any>({
             collection: coleccion,
             replicationIdentifier: 'sync-indice-' + this.version,
-            live: true,
+            live: false,
+            autoStart: false,
             retryTime: 4000,
             push: {
                 handler: async (rows) => {
@@ -1210,22 +1452,12 @@ export class RxdbService {
             }
         });
 
-        window.addEventListener('online', async () => {
-            console.log('📶 Red detectada. Volviendo a sincronizar culturas con Supabase...');
-            try {
-                await replica.reSync();
-            } catch (error) {
-                console.error('Error durante la resincronización automática:', error);
-            }
-        });
-
-        window.addEventListener('offline', () => {
-            console.log('Conexión Wi-Fi/Datos perdida. Operando en modo local seguro.');
-        });
-
         replica.error$.subscribe(err => {
-            console.error('❌ Error crítico en replicación de Culturas:', err);
+            console.error('❌ Error crítico en replicación de Índices:', err);
         });
+
+        this.replicas.indice = replica;
+        return replica;
     }
 
     async eliminarTodoIndice() {
@@ -1254,11 +1486,12 @@ export class RxdbService {
     }
 
     //Sincronizacion de contenido indice
-    private sincronizarContenidoIndice(coleccion: RxCollection<ContenidoIndice>) {
+    private sincronizarContenidoIndice(coleccion: RxCollection<ContenidoIndice>): RxReplicationState<ContenidoIndice, any> {
         const replica = replicateRxCollection<ContenidoIndice, any>({
             collection: coleccion,
             replicationIdentifier: 'sync-contenido-indice-' + this.version,
-            live: true,
+            live: false,
+            autoStart: false,
             retryTime: 4000,
             push: {
                 handler: async (rows) => {
@@ -1308,22 +1541,12 @@ export class RxdbService {
             }
         });
 
-        window.addEventListener('online', async () => {
-            console.log('📶 Red detectada. Volviendo a sincronizar contenido con Supabase...');
-            try {
-                await replica.reSync();
-            } catch (error) {
-                console.error('Error durante la resincronización automática:', error);
-            }
-        });
-
-        window.addEventListener('offline', () => {
-            console.log('Conexión Wi-Fi/Datos perdida. Operando en modo local seguro.');
-        });
-
         replica.error$.subscribe(err => {
-            console.error('❌ Error crítico en replicación de Culturas:', err);
+            console.error('❌ Error crítico en replicación de Contenido de Índices:', err);
         });
+
+        this.replicas.contenidoIndice = replica;
+        return replica;
     }
 
     async eliminarTodoContenidoIndice() {

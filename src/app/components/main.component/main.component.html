@@ -3,12 +3,14 @@
     <div class="app-container">
 
         <header class="header">
-            <div class="header-btn-left">P</div>
+            <div class="header-btn-left" (click)="onSincronizarBDToCSV()"><fa-icon size="2x" [icon]="faDownload"></fa-icon></div>
+            <div class="header-btn-left" (click)="onGuardarCambios()"><fa-icon size="2x" [icon]="faSave"></fa-icon></div>
             <div class="header-title">PROTOUST</div>
-            <div class="header-btn-right">
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
+            <div class="header-btn-right" (click)="cargarTablasCSV()">
+               <fa-icon size="2x" [icon]="faRefresh"></fa-icon>
+            </div>
+            <div class="header-btn-right" (click)="onSincronizarCSVToBD()">
+               <fa-icon size="2x" [icon]="faUpload"></fa-icon>
             </div>
         </header>
 
@@ -18,7 +20,7 @@
                     <label>Menu:</label>
                     <div class="btn-group-four">
                         <button class="square-btn light-txt" (click)="abrirEditarText()"><fa-icon size="2x" [icon]="faFileHalfDashed"></fa-icon></button>
-                        <button class="square-btn light-txt" (click)="onGuardarCambios()"><fa-icon size="2x" [icon]="faSave"></fa-icon></button>
+                        <button class="square-btn light-txt" ><fa-icon size="2x" [icon]="faSave"></fa-icon></button>
                         <button class="square-btn light-txt" (click)="onMundoHistoria('mundo')"><fa-icon size="2x" [icon]="faEarthAmericas"></fa-icon></button>
                         <button class="square-btn light-txt" (click)="onMundoHistoria('historia')"><fa-icon size="2x" [icon]="faScroll"></fa-icon></button>
                     </div>
@@ -32,7 +34,7 @@
                             <div class="custom-select">
                                 <select name="universo" id="universo" (change)="onSelectUniverso($event)">
                                     <option [value]="0">Elige...</option>
-                                    @for (universo of (dbService.universo$ | async); track universo.id) {
+                                    @for (universo of todosUniverso(); track universo.id) {
                                     <option [value]='universo.id'>{{universo.nombre}}</option>
                                     } @empty {
                                     <option [value]='0'>-Vacio-</option>
@@ -44,7 +46,7 @@
                                 <button class="square-btn light-txt" (click)="onEliminarUniverso()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
                                 <button class="square-btn light-txt"
                                    ><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                <button class="square-btn light-txt"
+                                <button class="square-btn light-txt" (click)="onUniversoDetalles(selectUniverso)"
                                     ><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                             </div>
                         </div>
@@ -71,7 +73,7 @@
                                     <button class="square-btn light-txt" (click)="onNuevoMundo()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
                                     <button class="square-btn light-txt" (click)="onEliminarMundo()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
                                     <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onMundoDetalles(selectMundo)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                                 </div>
                             </div>
                             <div class="grid-three-cols">
@@ -121,7 +123,7 @@
                                     <button class="square-btn light-txt" (click)="onNuevocultura()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
                                     <button class="square-btn light-txt" (click)="onEliminarCultura()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
                                     <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onCulturaDetalles(selectCultura)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                                 </div>
                             </div>
                             <div class="grid-three-cols">
@@ -214,7 +216,7 @@
                                     <button class="square-btn light-txt" (click)="onNuevoPersonaje()"><fa-icon size="2x" [icon]="faBaby"></fa-icon></button>
                                     <button class="square-btn light-txt" (click)="onEliminarPersonaje()"><fa-icon size="2x" [icon]="faSkullCrossbones"></fa-icon></button>
                                     <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onPersonajeDetalles(selectPersonaje)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                                 </div>
                             </div>
                             <div class="grid-three-cols">
@@ -306,7 +308,7 @@
                                     <button class="square-btn light-txt" (click)="onNuevaCreatura()"><fa-icon size="2x" [icon]="faDragon"></fa-icon></button>
                                     <button class="square-btn light-txt" (click)="onEliminarCreatura()"><fa-icon size="2x" [icon]="faMeteor"></fa-icon></button>
                                     <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onCreaturaDetalles(selectCreatura)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                                 </div>
                             </div>
 
@@ -408,7 +410,7 @@
                                 <button class="square-btn light-txt" (click)="onNuevoSaga()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
                                 <button class="square-btn light-txt" (click)="onEliminarSaga()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
                                 <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onSagaDetalles(selectSaga)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                             </div>
                         </div>
                     </div>
@@ -430,7 +432,7 @@
                                 <button class="square-btn light-txt" (click)="onNuevoTomo()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
                                 <button class="square-btn light-txt" (click)="onEliminarTomo()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
                                 <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onTomoDetalles(selectTomo)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                             </div>
                         </div>
                     </div>
@@ -450,9 +452,9 @@
                                     <td class="col-num">{{i + 1}}</td>
                                     <td class="col-text">{{indice.nombre}}</td>
                                     <td class="col-actions">
-                                        <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                        <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
-                                        <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faPenFancy"></fa-icon></button>
+                                        <button class="square-btn light-txt" (click)="onEliminarIndice(indice)"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
+                                        <button class="square-btn light-txt" (click)="onIndiceDetalles(indice)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                        <button class="square-btn light-txt" (click)="onCambiarTituloIndice(indice)"><fa-icon size="2x" [icon]="faPenFancy"></fa-icon></button>
                                         <button class="square-btn light-txt"
                                             (click)="onAddContenidoIndice(indice.id, indice.nombre,i)"><fa-icon size="2x" [icon]="faFileHalfDashed"></fa-icon></button>
                                     </td>
@@ -465,7 +467,6 @@
                                     <td class="col-actions">
                                         <button class="square-btn light-txt"
                                             (click)="onNuevoIndice()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
-                                        <button class="square-btn light-txt" (click)="onEliminarIndice()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
                                     </td>
                                 </tr>
                             </tfoot>
@@ -479,9 +480,9 @@
         </main>
 
         <footer class="footer">
-            <button class="footer-btn">Creatividad</button>
+            <button class="footer-btn" (click)="onClickCreatividad()">Creatividad</button>
             <button class="footer-btn">CaleVRije</button>
-            <button class="footer-btn">Personas</button>
+            <button class="footer-btn" (click)="onClickMente()">Personas</button>
         </footer>
 
     </div>
