@@ -23,7 +23,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faSave, faFileHalfDashed, faGlobe, faBook, faEarthAmericas, faScroll, faImage,
   faCircleInfo, faSquarePlus, faBaby, faDragon, faMeteor, faSkullCrossbones, faTrashCan, faPenFancy,
-  faDownload, faUpload, faRefresh
+  faDownload, faUpload, faRefresh, faLevelDown
 } from '@fortawesome/free-solid-svg-icons';
 
 
@@ -56,6 +56,7 @@ export class MainComponent {
   faDownload = faDownload;
   faUpload = faUpload;
   faRefresh = faRefresh;
+  faLevelDown = faLevelDown;
   /*****************************************
    * Variables Internas
    * ***************************************
@@ -576,24 +577,24 @@ export class MainComponent {
   }
 
   async onAddContenidoIndice(indiceId: string, indiceNombre: string, i: number) {
-      const contenidoIndice = this.buscarContenidoIndiceId(indiceId, indiceNombre);
-      if (contenidoIndice) {
-        const contenido = await this.abrirTextPlus(contenidoIndice.contenido);
-        contenidoIndice.contenido = contenido;
-      } else {
-        const contenido = await this.abrirTextPlus('');
-        if (!contenido || !contenido.trim()) {
-          return;
-        }
-        const newContenidoIndice = { ...this.vacioContenidoIndice };
-        newContenidoIndice.contenido = contenido;
-        newContenidoIndice.indiceId = indiceId;
-        newContenidoIndice.indice = i.toString();
-        newContenidoIndice.nombre = indiceNombre;
-        newContenidoIndice.id = this.getId();
-        newContenidoIndice.updatedAt = Date.now();
-        this.todosContenidoIndice.update(arr => [...arr, newContenidoIndice]);
+    const contenidoIndice = this.buscarContenidoIndiceId(indiceId, indiceNombre);
+    if (contenidoIndice) {
+      const contenido = await this.abrirTextPlus(contenidoIndice.contenido);
+      contenidoIndice.contenido = contenido;
+    } else {
+      const contenido = await this.abrirTextPlus('');
+      if (!contenido || !contenido.trim()) {
+        return;
       }
+      const newContenidoIndice = { ...this.vacioContenidoIndice };
+      newContenidoIndice.contenido = contenido;
+      newContenidoIndice.indiceId = indiceId;
+      newContenidoIndice.indice = i.toString();
+      newContenidoIndice.nombre = indiceNombre;
+      newContenidoIndice.id = this.getId();
+      newContenidoIndice.updatedAt = Date.now();
+      this.todosContenidoIndice.update(arr => [...arr, newContenidoIndice]);
+    }
   }
 
   //funciones para eliminar elementos
@@ -730,58 +731,74 @@ export class MainComponent {
     }
   }
 
-onCambiarTituloIndice(indice: Indice){
-indice.nombre = prompt("Introduce el nuevo nombre del índice", indice.nombre) || indice.nombre;
-}
+  onCambiarTituloIndice(indice: Indice) {
+    indice.nombre = prompt("Introduce el nuevo nombre del índice", indice.nombre) || indice.nombre;
+  }
 
-async onUniversoDetalles(universo:Universo){
-  const contenido = await this.abrirTextPlus(universo.detalles);
-  universo.detalles = contenido;
-  console.log(contenido);
-}
+  async onUniversoDetalles(universo: Universo) {
+    const contenido = await this.abrirTextPlus(universo.detalles);
+    universo.detalles = contenido;
+    console.log(contenido);
+  }
 
-async onMundoDetalles(mundo: Mundo){
-  const contenido = await this.abrirTextPlus(mundo.detalles);
-  mundo.detalles = contenido;
-  console.log(contenido);
-}
+  async onMundoDetalles(mundo: Mundo) {
+    const contenido = await this.abrirTextPlus(mundo.detalles);
+    mundo.detalles = contenido;
+    console.log(contenido);
+  }
 
-async onPersonajeDetalles(personaje: Personaje){
-  const contenido = await this.abrirTextPlus(personaje.detalles);
-  personaje.detalles = contenido;
-  console.log(contenido);
-}
+  async onPersonajeDetalles(personaje: Personaje) {
+    const contenido = await this.abrirTextPlus(personaje.detalles);
+    personaje.detalles = contenido;
+    console.log(contenido);
+  }
 
-async onCreaturaDetalles(creatura: Creatura){
-  const contenido = await this.abrirTextPlus(creatura.detalles);
-  creatura.detalles = contenido;
-  console.log(contenido);
-}
+  async onCreaturaDetalles(creatura: Creatura) {
+    const contenido = await this.abrirTextPlus(creatura.detalles);
+    creatura.detalles = contenido;
+    console.log(contenido);
+  }
 
-async onSagaDetalles(saga: Saga){
-  const contenido = await this.abrirTextPlus(saga.detalles);
-  saga.detalles = contenido;
-  console.log(contenido);
-}
+  async onSagaDetalles(saga: Saga) {
+    const contenido = await this.abrirTextPlus(saga.detalles);
+    saga.detalles = contenido;
+    console.log(contenido);
+  }
 
-async onTomoDetalles(tomo: Tomo){
-  const contenido = await this.abrirTextPlus(tomo.detalles);
-  tomo.detalles = contenido;
-  console.log(contenido);
-}
+  async onTomoDetalles(tomo: Tomo) {
+    const contenido = await this.abrirTextPlus(tomo.detalles);
+    tomo.detalles = contenido;
+    console.log(contenido);
+  }
 
-async onIndiceDetalles(indice: Indice){
-  const contenido = await this.abrirTextPlus(indice.detalles);
-  indice.detalles = contenido;
-  console.log(contenido);
-}
+  async onIndiceDetalles(indice: Indice) {
+    const contenido = await this.abrirTextPlus(indice.detalles);
+    indice.detalles = contenido;
+    console.log(contenido);
+  }
 
-async onCulturaDetalles(cultura: Cultura){
-  const contenido = await this.abrirTextPlus(cultura.detalles);
-  cultura.detalles = contenido;
-  console.log(contenido);
-}
+  async onCulturaDetalles(cultura: Cultura) {
+    const contenido = await this.abrirTextPlus(cultura.detalles);
+    cultura.detalles = contenido;
+    console.log(contenido);
+  }
 
+  mundoShow: boolean = true;
+  onMundoShow() {
+    this.mundoShow = !this.mundoShow;
+  }
+
+  culturaShow: boolean = true;
+  onCulturaShow() {
+    this.culturaShow = !true;
+    this.creturaShow = !false;
+  }
+
+  creturaShow: boolean = true;
+  onCreaturaShow() {
+    this.culturaShow = true;
+    this.creturaShow = false;
+  }
   /***************************
    *    Funciones Internas   *
    ***************************/
@@ -948,11 +965,11 @@ async onCulturaDetalles(cultura: Cultura){
     this.textoAEditar = this.textareaSeleccionada()?.value || '';
     this.mostrarTextPlus = true;
   }
-  onClickCreatividad(){
+  onClickCreatividad() {
     window.location.href = '/creatividad';
   }
 
-  onClickMente(){
+  onClickMente() {
     window.location.href = '/mente';
   }
 }

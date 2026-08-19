@@ -27,7 +27,6 @@
                 </div>
 
                 <div class="control-panel-v2">
-
                     <div class="section-block">
                         <div class="row-full-select">
                             <label>Universo:</label>
@@ -58,7 +57,11 @@
 
                         <div class="section-block">
                             <div class="row-full-select">
-                                <label for="opciones">Mundo:</label>
+                                <label for="opciones" id="label">Mundo:
+                                <button class="square-btn light-txt" (click)="onMundoShow()"><fa-icon size="2x" [icon]="faLevelDown"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onCulturaShow()"><fa-icon size="2x" [icon]="faGlobe"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onCreaturaShow()"><fa-icon size="2x" [icon]="faDragon"></fa-icon></button>
+                                </label>
                                 <div class="custom-select">
                                     <select name="mundo" id="mundo" (change)="onSelectMundo($event)">
                                         <option value='0'>Elige...</option>
@@ -76,7 +79,7 @@
                                     <button class="square-btn light-txt" (click)="onMundoDetalles(selectMundo)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                                 </div>
                             </div>
-                            <div class="grid-three-cols">
+                            <div class="grid-three-cols" [ngClass]="{'hidden': !mundoShow}">
                                 <div class="input-cell">
                                     <label>Diferente</label>
                                     <textarea [(ngModel)]="selectMundo.diferente" #queDiferente></textarea>
@@ -90,7 +93,7 @@
                                     <textarea [(ngModel)]="selectMundo.reglas"></textarea>
                                 </div>
                             </div>
-                            <div class="grid-three-cols">
+                            <div class="grid-three-cols" [ngClass]="{'hidden': !mundoShow}">
                                 <div class="input-cell">
                                     <label>Geografia</label>
                                     <textarea [(ngModel)]="selectMundo.geografia"></textarea>
@@ -106,7 +109,7 @@
                             </div>
                         </div>
 
-                        <div class="section-block">
+                        <div class="section-block" [ngClass]="{'hidden': culturaShow}">
                             <div class="row-full-select">
                                 <label>Culturas:</label>
                                 <div class="custom-select">
@@ -198,7 +201,7 @@
                             </div>
                         </div>
 
-                        <div class="section-block">
+                        <div class="section-block" [ngClass]="{'hidden': culturaShow}">
                             <div class="row-full-select">
                                 <label>Personajes:</label>
                                 <div class="custom-select">
@@ -291,7 +294,7 @@
                             </div>
                         </div>
 
-                        <div class="section-block">
+                        <div class="section-block" [ngClass]="{'hidden': creturaShow}">
                             <div class="row-full-select">
                                 <label>Creaturas:</label>
                                 <div class="custom-select">
