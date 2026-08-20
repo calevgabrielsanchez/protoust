@@ -3,14 +3,14 @@
     <div class="app-container">
 
         <header class="header">
-            <div class="header-btn-left" ><fa-icon size="2x" [icon]="faDownload"></fa-icon></div>
-            <div class="header-btn-left" ><fa-icon size="2x" [icon]="faSave"></fa-icon></div>
+            <div class="header-btn-left"><fa-icon size="2x" [icon]="faDownload"></fa-icon></div>
+            <div class="header-btn-left"><fa-icon size="2x" [icon]="faSave"></fa-icon></div>
             <div class="header-title">PROTOUST</div>
-            <div class="header-btn-right" >
-               <fa-icon size="2x" [icon]="faRefresh"></fa-icon>
+            <div class="header-btn-right">
+                <fa-icon size="2x" [icon]="faRefresh"></fa-icon>
             </div>
-            <div class="header-btn-right" >
-               <fa-icon size="2x" [icon]="faUpload"></fa-icon>
+            <div class="header-btn-right">
+                <fa-icon size="2x" [icon]="faUpload"></fa-icon>
             </div>
         </header>
 
@@ -19,51 +19,90 @@
                 <div class="row-universo">
                     <label>Menu:</label>
                     <div class="btn-group-four">
-                        <button class="square-btn light-txt" ><fa-icon size="2x" [icon]="faFileHalfDashed"></fa-icon></button>
-                        <button class="square-btn light-txt" ><fa-icon size="2x" [icon]="faSave"></fa-icon></button>
-                        <button class="square-btn light-txt" ><fa-icon size="2x" [icon]="faEarthAmericas"></fa-icon></button>
-                        <button class="square-btn light-txt" ><fa-icon size="2x" [icon]="faScroll"></fa-icon></button>
+                        <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faBrain"></fa-icon></button>
+                        <button class="square-btn light-txt"><fa-icon size="2x"
+                                [icon]="faUserSecret"></fa-icon></button>
+                        <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faBug"></fa-icon></button>
+                        <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faShrimp"></fa-icon></button>
                     </div>
                 </div>
+                <div id="creatividad-div">
+                    <div class="control-panel-v2">
+                        <div class="section-block">
+                            <div class="row-full-select">
+                                <label>Ejercicio:</label>
+                                <div class="custom-select">
+                                    <select name="ejercicio" id="ejercicio" (change)="onSelectEjercicio($event)">
+                                        <option value='0'>Elige...</option>
+                                        @for (ejercicio of ejercicios(); track ejercicio.id) {
+                                        <option value='{{ejercicio.id}}'>{{ejercicio.nombre}}</option>
+                                        } @empty {
+                                        <option value='0'>-Vacio-</option>
+                                        }
+                                    </select>
+                                </div>
+                                <p style="color: #44e233;">{{descripcionEjercicioSeleccionado}}</p>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="control-panel-v2">
-                    <div class="section-block">
-                        <div class="row-full-select">
-                            <label>Ejercicio:</label>
-                            <div class="custom-select">
-                                
+                    <div class="control-panel-v2">
+                        <div class="section-block">
+                            <div class="row-full-select">
+                                <label>Arquetipos:</label>
+                                <div class="custom-select">
+                                    <select name="arquetipo" id="arquetipo" (change)="onSelectArquetipo($event)">
+                                        <option value='0'>Elige...</option>
+                                        @for (arquetipo of arquetipos(); track arquetipo.id) {
+                                        <option value='{{arquetipo.id}}'>{{arquetipo.nombre}}</option>
+                                        } @empty {
+                                        <option value='0'>-Vacio-</option>
+                                        }
+                                    </select>
+                                </div>
+                                <pre style="color: #44e233;overflow: auto;">{{descripcionArquetipoSeleccionado}}</pre>
                             </div>
                             <div class="col-actions">
-                                <button class="square-btn light-txt" ><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
-                                <button class="square-btn light-txt" ><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
-                                <button class="square-btn light-txt"
-                                   ><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                <button class="square-btn light-txt" ><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onArquetipoAleatorio()"><fa-icon size="2x"
+                                        [icon]="faArrowsSpin"></fa-icon></button>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-panel-v2">
+                        <div class="section-block">
+                            <div class="row-full-select">
+                                <label>Generar Palabras</label>
+                                <div class="word-generate">
+                                    @for(palabra of (palabras()); track $index) {
+                                    <span class="word">{{ palabra.palabra }}</span>
+                                    }
+                                </div>
+                                <div class="checks-conts">
+                                    <form action="" [formGroup]="camposSemanticos" class="form-palabras">
+                                        <label><input type="checkbox" formControlName="animales"> Animales</label>
+                                        <label><input type="checkbox" formControlName="adjetivos"> Adjetivos</label>
+                                        <label><input type="checkbox" formControlName="hombre"> Hombre</label>
+                                        <label><input type="checkbox" formControlName="lugares"> Lugares</label>
+                                        <label><input type="checkbox" formControlName="mujer"> Mujer</label>
+                                        <label><input type="checkbox" formControlName="oficios"> Oficios</label>
+                                        <label><input type="checkbox" formControlName="pronombres"> Pronombres</label>
+                                        <label><input type="checkbox" formControlName="sustantivos"> Sustantivos</label>
+                                        <label><input type="checkbox" formControlName="transporte"> Transporte</label>
+                                        <label><input type="checkbox" formControlName="verbos"> Verbos</label>
+                                        <label><input type="checkbox" formControlName="varias"> Varias</label>
+                                    </form>
+                                </div>
+                                <div class="col-actions">
+                                    <button class="square-btn light-txt" (click)="onGenerarPalabras()"><fa-icon
+                                            size="2x" [icon]="faArrowsSpin"></fa-icon></button>
+
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="control-panel-v2">
-                    <div class="section-block">
-                        <div class="row-full-select">
-                            <label>Generar Palabras</label>
-                            <div class="word-generate">
-                                @for(palabra of (palabras()); track $index) {
-                                    <span class="word">{{ palabra.verbo }}</span>
-                                }
-                            </div>
-                            <div class="col-actions">
-                                <button class="square-btn light-txt" (click)="onGenerarPalabras()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
-                                <button class="square-btn light-txt" ><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
-                                <button class="square-btn light-txt"
-                                   ><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                <button class="square-btn light-txt" ><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
 
             </div>
 
@@ -71,7 +110,7 @@
         </main>
 
         <footer class="footer">
-            <button class="footer-btn">Creatividad</button>
+            <button class="footer-btn">Juegos</button>
             <button class="footer-btn" (click)="onClickCaleVRije()">CaleVRije</button>
             <button class="footer-btn" (click)="onClickMente()">Personas</button>
         </footer>

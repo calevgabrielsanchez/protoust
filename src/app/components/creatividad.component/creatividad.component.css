@@ -3,7 +3,7 @@
     box-sizing: content-box;
     margin: 0;
     padding: 0;
-    font-size: 13px !important;
+    font-size: 15px !important;
     font-family: 'ubuntu', sans-serif;
 }
 
@@ -165,9 +165,8 @@
     padding-bottom: 10px;
 }
 
-.row-universo label {
-    color: white;
-    font-size: 16px;
+#creatividad-div>div {
+    margin-top: 7px;
 }
 
 .btn-group-four {
@@ -337,6 +336,43 @@ textarea:focus {
   background-color: #44e233;
   color: #222226;
   margin-right: 2px;
+}
+
+.form-palabras {
+  display: grid;
+  /* Crea columnas automáticas de un ancho mínimo de 150px y se expanden equitativamente */
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px; /* Espacio de separación entre elementos */
+  padding: 16px;
+}
+
+.form-palabras label {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espacio entre el checkbox y el texto */
+  cursor: pointer;
+  font-size: 14px;
+  color: #44e233 !important;
+}
+
+.word-generate {
+  display: flex;
+  flex-wrap: wrap;       /* Permite que los elementos bajen a la siguiente línea si no caben */
+  gap: 12px;             /* Espacio uniforme entre cada palabra/tarjeta */
+  padding: 16px;
+  justify-content: left; /* Centra las palabras (puedes cambiarlo a 'flex-start' si prefieres alinearlas a la izquierda) */
+}
+
+.word {
+  background-color: #f0f4f8; /* Color de fondo suave (estilo tarjeta) */
+  color: #333333;            /* Color del texto */
+  padding: 10px 16px;        /* Espacio interno para que no se vea apretado */
+  border-radius: 8px;        /* Bordes redondeados modernos */
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Sutil sombra para dar profundidad */
+  border: 1px solid #e2e8f0; /* Borde sutil */
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 @media screen and (width <=768px) {
