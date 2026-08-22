@@ -2,7 +2,7 @@ import { Component, inject, Signal, signal } from '@angular/core';
 import {
   faSave, faFileHalfDashed, faGlobe, faBook, faEarthAmericas, faScroll, faImage,
   faCircleInfo, faSquarePlus, faBaby, faDragon, faMeteor, faSkullCrossbones, faTrashCan, faPenFancy,
-  faDownload, faUpload, faRefresh, faBrain, faBug, faUserSecret, faShrimp, faArrowsSpin
+  faDownload, faUpload, faRefresh, faBrain, faBug, faUserSecret, faShrimp, faArrowsSpin, faEye, faBookOpen
 } from '@fortawesome/free-solid-svg-icons';
 import { TextPlusComponent } from '../text-plus.component/text-plus.component';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
@@ -11,6 +11,13 @@ import { FormBuilder, FormGroup, FormArray, FormControl, ReactiveFormsModule } f
 import { CommonModule } from '@angular/common';
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+
+import {
+  AfterViewInit,
+  ElementRef,
+  ViewChild
+} from '@angular/core';
+
 
 @Component({
   selector: 'app-creatividad.component',
@@ -25,7 +32,7 @@ export class CreatividadComponent {
   descripcionEjercicioSeleccionado: string = "";
   descripcionArquetipoSeleccionado: string = "";
 
-  private http = inject(HttpClient);
+  http = inject(HttpClient);
 
   faSave = faSave;
   faFileHalfDashed = faFileHalfDashed;
@@ -50,6 +57,8 @@ export class CreatividadComponent {
   faUserSecret = faUserSecret;
   faShrimp = faShrimp;
   faArrowsSpin = faArrowsSpin;
+  faEye = faEye
+  faBookOpen = faBookOpen;
 
   mostrarTextPlus: boolean = false;
   textoAEditar: string = "";
@@ -59,6 +68,10 @@ export class CreatividadComponent {
 
   ejercicios = signal<any[]>([]);
   arquetipos = signal<any[]>([]);
+
+  historia: string[] = [];
+
+  inputId: number = 0;
 
   constructor() {
     this.camposSemanticos = new FormGroup({
@@ -76,16 +89,23 @@ export class CreatividadComponent {
     });
   }
 
-  ngOnInit(){
+  ngOnInit() {
     this.obtenerEjercicio();
     this.obtenerArquetipo();
+    //----------------Memoria---------------
+    this.crearTablaMemoria();
+    //Crear el memoria
+    for (let i = 0; i < 20; i++) {
+      this.historia.push('');
+    }
+
   }
 
   cerrar() {
     this.closeTextPlus(this.textoAEditar);
   }
 
-  private closeTextPlus(resolvedValue: string) {
+  closeTextPlus(resolvedValue: string) {
     this.mostrarTextPlus = false;
     /* if (this.textPlusPromiseResolver) {
        this.textPlusPromiseResolver(resolvedValue);
@@ -94,7 +114,11 @@ export class CreatividadComponent {
   }
 
   aceptar() {
-    /* const elementoTextarea = this.textareaSeleccionada();
+
+    this.historia[this.inputId - 1] = this.textoAEditar;
+    console.log(this.textoAEditar)
+    this.mostrarTextPlus = false;
+    /* const elementoTextarea = elementotareaSeleccionada();
  
      if (elementoTextarea) {
        elementoTextarea.value = this.textoAEditar;
@@ -199,7 +223,7 @@ export class CreatividadComponent {
         }
         if (resultados.verbos) {
           const datos = this.convertirCsvAObjeto(resultados.verbos);
-          listaPalabras.push(...this.obtenerElementosAleatorios(datos,numero));
+          listaPalabras.push(...this.obtenerElementosAleatorios(datos, numero));
         }
         if (resultados.varias) {
           const datos = this.convertirCsvAObjeto(resultados.varias);
@@ -216,7 +240,7 @@ export class CreatividadComponent {
     });
   }
 
-  private convertirCsvAObjeto(texto: string): any[] {
+  convertirCsvAObjeto(texto: string): any[] {
     // Separar por saltos de línea (\r\n o \n)
     const lineas = texto.trim().split(/\r?\n/);
     if (lineas.length === 0) return [];
@@ -281,32 +305,735 @@ export class CreatividadComponent {
   onSelectEjercicio($event: any) {
     const idSeleccionado = $event.target.value;
     const ejercicioSeleccionado = this.ejercicios().find(
-    (item) => item.id == idSeleccionado
-  );
-  this.descripcionEjercicioSeleccionado = ejercicioSeleccionado.descripcion;
+      (item) => item.id == idSeleccionado
+    );
+    this.descripcionEjercicioSeleccionado = ejercicioSeleccionado.descripcion;
   }
 
   onSelectArquetipo($event: any) {
-      const idSeleccionado = $event.target.value;
+    const idSeleccionado = $event.target.value;
     const arquetipoSeleccionado = this.arquetipos().find(
-    (item) => item.id == idSeleccionado
-  );
-  console.log(arquetipoSeleccionado);
-  this.descripcionArquetipoSeleccionado = arquetipoSeleccionado.categoria + "\n" + 
-  arquetipoSeleccionado.descripcion + "\nFrase: "+ 
-  arquetipoSeleccionado.frase_tipica +"\nEjemplos: "+arquetipoSeleccionado.ejemplos;
+      (item) => item.id == idSeleccionado
+    );
+    console.log(arquetipoSeleccionado);
+    this.descripcionArquetipoSeleccionado = arquetipoSeleccionado.categoria + "\n" +
+      arquetipoSeleccionado.descripcion + "\nFrase: " +
+      arquetipoSeleccionado.frase_tipica + "\nEjemplos: " + arquetipoSeleccionado.ejemplos;
   }
 
-  onArquetipoAleatorio(){
+  onArquetipoAleatorio() {
     //generar un número aleatorio entre 0 y el tamaño del arreglo de arquetipos
     const indiceAleatorio = Math.floor(Math.random() * this.arquetipos().length);
     const arquetipoAleatorio = this.arquetipos()[indiceAleatorio];
-    this.descripcionArquetipoSeleccionado = arquetipoAleatorio.categoria + "\n" + 
-    arquetipoAleatorio.descripcion + "\nFrase: "+ 
-    arquetipoAleatorio.frase_tipica +"\nEjemplos: "+arquetipoAleatorio.ejemplos;
+    this.descripcionArquetipoSeleccionado = arquetipoAleatorio.categoria + "\n" +
+      arquetipoAleatorio.descripcion + "\nFrase: " +
+      arquetipoAleatorio.frase_tipica + "\nEjemplos: " + arquetipoAleatorio.ejemplos;
     //seleccionar el arquetipo aleatorio en el select
     const selectElement = document.getElementById("arquetipo") as HTMLSelectElement;
     selectElement.value = arquetipoAleatorio.id.toString();
+  }
+
+  creatividad: boolean = false;
+  memoria: boolean = false;
+  matematicas: boolean = false;
+  dibujo: boolean = true;
+  selectJuego(juego: string) {
+    this.creatividad = false;
+    this.memoria = false;
+    this.matematicas = false;
+    this.dibujo = false;
+    switch (juego) {
+      case 'creatividad':
+        this.creatividad = true;
+        break;
+      case 'memoria':
+        this.memoria = true;
+        break;
+      case 'matematicas':
+        this.matematicas = true;
+        break;
+      case 'dibujo':
+        this.dibujo = true;
+        break;
+    }
+  }
+  //-----------------------------------------------------Memoria-----------------------------------------------------
+  tablaMemoria = signal<any[]>([]);
+  crearTablaMemoria() {
+    let peticionesMemori: any = {};
+    peticionesMemori.tablaMemoria = this.http.get('/csv/memoria.csv', { responseType: 'text' });
+    forkJoin(peticionesMemori).subscribe({
+      next: (resultados: any) => {
+        if (resultados.tablaMemoria) {
+          const datos = this.convertirCsvAObjeto(resultados.tablaMemoria);
+          this.tablaMemoria.set(datos);
+          console.log(datos)
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar el archivo CSV de memoria:', err);
+      }
+    });
+  }
+  ocultarPalabra($event: any) {
+    const elemento = $event.currentTarget as HTMLElement;
+    const id = elemento.getAttribute('data-id');
+
+    console.log(id);
+    const inputText = document.getElementById(id || '');
+
+    if (inputText) {
+      inputText.classList.toggle('oculto-text');
+    }
+
+  }
+
+  alternarPalabra() {
+    this.http.get('/csv/todasPalabras.csv', { responseType: 'text' })
+      .subscribe({
+        next: (resultado) => {
+
+          const datos = this.convertirCsvAObjeto(resultado);
+          const palabrasAleatorias = this.obtenerElementosAleatorios(datos, 20)
+          const inputs = document.querySelectorAll('.input-text');
+
+          this.historia = [];
+
+          inputs.forEach((input, i) => {
+            (input as HTMLInputElement).value = palabrasAleatorias[i].todasPalabras;
+            this.historia.push(palabrasAleatorias[i].todasPalabras);
+            console.log(palabrasAleatorias[i].todasPalabras);
+          });
+        },
+        error: (err) => {
+          console.error('Error al cargar el archivo CSV:', err);
+        }
+      });
+  }
+
+  ocultarTodasPalabra() {
+    const inputs = document.querySelectorAll('.input-text');
+    inputs.forEach((input, i) => {
+      // (input as HTMLInputElement).value = palabrasAleatorias[i].todasPalabras;
+      input.classList.toggle('oculto-text');
+    });
+  }
+
+  escribirHistoria($event: any) {
+    const elemento = $event.currentTarget as HTMLElement;
+    const id = elemento.getAttribute('data-id');
+    const numeroId = id?.substring(4, 5);
+    this.inputId = parseInt(numeroId || '')
+    const inputText = document.getElementById(id || '');
+    if ((this.historia[this.inputId - 1] != (inputText as HTMLInputElement).value) && (this.historia[this.inputId - 1] != '')) {
+      this.textoAEditar = this.historia[this.inputId - 1];
+    } else {
+      this.textoAEditar = (inputText as HTMLInputElement).value
+    }
+    this.mostrarTextPlus = true;
+  }
+
+  escribirTodaHistoria() {
+    let texto = '';
+    for (let i = 0; i < 20; i++) {
+      texto = texto + '>----------------' + (i + 1) + '----------------<\n';
+      texto = texto + this.historia[i] + "\n";
+    }
+    console.log(texto);
+  }
+  //---------------------------------------------------dibujo ------------------------------
+
+  // ============================================================
+  // CANVAS
+  // ============================================================
+
+  @ViewChild('canvas')
+  canvas?: ElementRef<HTMLCanvasElement>;
+
+  ctx?: CanvasRenderingContext2D;
+
+  isDrawing = false;
+
+
+  // ============================================================
+  // CARACTERES ALEATORIOS
+  // ============================================================
+
+  randomCharacter = '';
+
+  characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  // ============================================================
+  // OBTENER CANVAS
+  // ============================================================
+
+  getCanvasElement(): HTMLCanvasElement | null {
+
+    /*
+     * Primero intentamos utilizar @ViewChild si existe.
+     */
+
+    if (this.canvas?.nativeElement) {
+      return this.canvas.nativeElement;
+    }
+
+
+    /*
+     * Si @ViewChild todavía no está disponible,
+     * buscamos el canvas por su clase.
+     */
+
+    const element = document.querySelector(
+      'canvas.canvas-dibujo'
+    );
+
+
+    if (element instanceof HTMLCanvasElement) {
+      return element;
+    }
+
+
+    console.error(
+      'No se encontró el elemento canvas.'
+    );
+
+    return null;
+  }
+
+
+  // ============================================================
+  // OBTENER CANVAS DESDE EL EVENTO
+  // ============================================================
+
+  getCanvasFromEvent(
+    event: PointerEvent
+  ): HTMLCanvasElement | null {
+
+    const target = event.currentTarget;
+
+
+    if (target instanceof HTMLCanvasElement) {
+      return target;
+    }
+
+
+    return null;
+  }
+
+
+  // ============================================================
+  // CONFIGURAR CANVAS
+  // ============================================================
+
+  configureCanvas(
+    context: CanvasRenderingContext2D
+  ): void {
+
+    context.lineWidth = 5;
+
+    context.lineCap = 'round';
+
+    context.lineJoin = 'round';
+
+    context.strokeStyle = '#000000';
+  }
+
+
+  // ============================================================
+  // GENERAR CARÁCTER ALEATORIO
+  // ============================================================
+
+  generateRandomCharacter(): void {
+
+    const index = Math.floor(
+      Math.random() * this.characters.length
+    );
+
+
+    this.randomCharacter =
+      this.characters[index];
+
+
+    /*
+     * Dibujamos el nuevo carácter.
+     */
+
+    this.drawCharacter();
+  }
+
+
+  // ============================================================
+  // DIBUJAR CARÁCTER
+  // ============================================================
+
+  drawCharacter(): void {
+
+    const canvas =
+      this.getCanvasElement();
+
+
+    if (!canvas) {
+      console.error(
+        'No se encontró el canvas para dibujar el carácter.'
+      );
+
+      return;
+    }
+
+
+    const context =
+      canvas.getContext('2d');
+
+
+    if (!context) {
+
+      console.error(
+        'No se pudo obtener el contexto 2D del canvas.'
+      );
+
+      return;
+    }
+
+
+    /*
+     * Guardamos el contexto.
+     */
+
+    this.ctx = context;
+
+
+    /*
+     * Limpiar canvas.
+     */
+
+    context.clearRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+
+    // ========================================================
+    // CARÁCTER
+    // ========================================================
+
+    /*
+     * Canvas:
+     *
+     * 500 x 800
+     *
+     * Área total:
+     *
+     * 400,000 px²
+     *
+     * El tamaño visual del carácter se aproxima
+     * al 58% del área.
+     */
+
+    const fontSize = 570;
+
+
+    context.save();
+
+
+    context.font =
+      `bold ${fontSize}px Arial`;
+
+
+    context.textAlign =
+      'center';
+
+
+    context.textBaseline =
+      'middle';
+
+
+    context.fillStyle =
+      '#000000';
+
+
+    /*
+     * Dibujar carácter exactamente
+     * en el centro.
+     */
+
+    context.fillText(
+      this.randomCharacter,
+      canvas.width / 2,
+      canvas.height / 2
+    );
+
+
+    context.restore();
+
+
+    /*
+     * Volver a configurar el pincel
+     * para que el usuario pueda dibujar.
+     */
+
+    this.configureCanvas(context);
+  }
+
+
+  // ============================================================
+  // COMENZAR DIBUJO
+  // ============================================================
+
+  startDrawing(
+    event: PointerEvent
+  ): void {
+
+    event.preventDefault();
+
+
+    /*
+     * Obtenemos directamente el canvas
+     * que recibió el evento.
+     *
+     * Esto evita el problema:
+     *
+     * this.canvas.nativeElement
+     *
+     * undefined.
+     */
+
+    const canvas =
+      this.getCanvasFromEvent(event);
+
+
+    if (!canvas) {
+
+      console.error(
+        'El evento no proviene de un canvas.'
+      );
+
+      return;
+    }
+
+
+    /*
+     * Obtener contexto.
+     */
+
+    const context =
+      canvas.getContext('2d');
+
+
+    if (!context) {
+
+      console.error(
+        'No se pudo obtener el contexto 2D.'
+      );
+
+      return;
+    }
+
+
+    this.ctx =
+      context;
+
+
+    this.isDrawing =
+      true;
+
+
+    /*
+     * Configuración del pincel.
+     */
+
+    this.configureCanvas(
+      context
+    );
+
+
+    /*
+     * Obtener posición del dedo
+     * o mouse.
+     */
+
+    const position =
+      this.getPointerPosition(
+        event,
+        canvas
+      );
+
+
+    /*
+     * Comenzar trazo.
+     */
+
+    context.beginPath();
+
+
+    context.moveTo(
+      position.x,
+      position.y
+    );
+
+
+    /*
+     * Capturar el puntero.
+     *
+     * Esto mejora el dibujo cuando
+     * el dedo/mouse sale momentáneamente
+     * del canvas.
+     */
+
+    try {
+
+      canvas.setPointerCapture(
+        event.pointerId
+      );
+
+    } catch {
+
+      // Algunos dispositivos pueden no soportarlo.
+    }
+  }
+
+
+  // ============================================================
+  // DIBUJAR
+  // ============================================================
+
+  draw(
+    event: PointerEvent
+  ): void {
+
+    if (
+      !this.isDrawing ||
+      !this.ctx
+    ) {
+
+      return;
+    }
+
+
+    event.preventDefault();
+
+
+    const canvas =
+      this.getCanvasFromEvent(event);
+
+
+    if (!canvas) {
+      return;
+    }
+
+
+    const position =
+      this.getPointerPosition(
+        event,
+        canvas
+      );
+
+
+    /*
+     * Dibujar línea.
+     */
+
+    this.ctx.lineTo(
+      position.x,
+      position.y
+    );
+
+
+    this.ctx.stroke();
+  }
+
+
+  // ============================================================
+  // FINALIZAR DIBUJO
+  // ============================================================
+
+  stopDrawing(
+    event?: PointerEvent
+  ): void {
+
+    if (!this.isDrawing) {
+      return;
+    }
+
+
+    this.isDrawing =
+      false;
+
+
+    /*
+     * Cerrar el trazo solamente
+     * si existe contexto.
+     */
+
+    if (this.ctx) {
+
+      this.ctx.closePath();
+    }
+
+
+    /*
+     * Liberar el puntero.
+     */
+
+    if (
+      event &&
+      event.currentTarget instanceof HTMLCanvasElement
+    ) {
+
+      const canvas =
+        event.currentTarget;
+
+
+      try {
+
+        canvas.releasePointerCapture(
+          event.pointerId
+        );
+
+      } catch {
+
+        // El puntero puede ya estar liberado.
+      }
+    }
+  }
+
+
+  // ============================================================
+  // POSICIÓN DEL PUNTERO
+  // ============================================================
+
+  getPointerPosition(
+    event: PointerEvent,
+    canvas: HTMLCanvasElement
+  ): {
+    x: number;
+    y: number;
+  } {
+
+    const rect =
+      canvas.getBoundingClientRect();
+
+
+    /*
+     * Escalado.
+     *
+     * Esto permite que funcione correctamente
+     * aunque el canvas visualmente tenga
+     * un tamaño diferente al interno.
+     */
+
+    const scaleX =
+      canvas.width / rect.width;
+
+
+    const scaleY =
+      canvas.height / rect.height;
+
+
+    return {
+
+      x:
+        (event.clientX - rect.left)
+        * scaleX,
+
+      y:
+        (event.clientY - rect.top)
+        * scaleY
+    };
+  }
+
+
+  // ============================================================
+  // LIMPIAR DIBUJO
+  // ============================================================
+
+  clearDrawing(): void {
+
+    const canvas =
+      this.getCanvasElement();
+
+
+    if (!canvas) {
+      return;
+    }
+
+
+    const context =
+      canvas.getContext('2d');
+
+
+    if (!context) {
+      return;
+    }
+
+
+    /*
+     * Limpiar todo.
+     */
+
+    context.clearRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+
+    /*
+     * Volver a dibujar el carácter.
+     */
+
+    if (this.randomCharacter) {
+
+      context.save();
+
+
+      context.font =
+        'bold 570px Arial';
+
+
+      context.textAlign =
+        'center';
+
+
+      context.textBaseline =
+        'middle';
+
+
+      context.fillStyle =
+        '#000000';
+
+
+      context.fillText(
+        this.randomCharacter,
+        canvas.width / 2,
+        canvas.height / 2
+      );
+
+
+      context.restore();
+
+
+      /*
+       * Restaurar configuración del pincel.
+       */
+
+      this.configureCanvas(
+        context
+      );
+    }
+  }
+
+
+  // ============================================================
+  // NUEVO CARÁCTER
+  // ============================================================
+
+  nuevoCaracter(): void {
+
+    this.generateRandomCharacter();
   }
 
 }

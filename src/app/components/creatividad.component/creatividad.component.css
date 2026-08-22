@@ -330,53 +330,204 @@ textarea:focus {
     display: none;
 }
 
-.word-generate>span{
+.word-generate>span {
     border-radius: 10px;
-  padding: 1px 5px;
-  background-color: #44e233;
-  color: #222226;
-  margin-right: 2px;
+    padding: 1px 5px;
+    background-color: #44e233;
+    color: #222226;
+    margin-right: 2px;
 }
 
 .form-palabras {
-  display: grid;
-  /* Crea columnas automáticas de un ancho mínimo de 150px y se expanden equitativamente */
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px; /* Espacio de separación entre elementos */
-  padding: 16px;
+    display: grid;
+    /* Crea columnas automáticas de un ancho mínimo de 150px y se expanden equitativamente */
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    /* Espacio de separación entre elementos */
+    padding: 16px;
 }
 
 .form-palabras label {
-  display: flex;
-  align-items: center;
-  gap: 8px; /* Espacio entre el checkbox y el texto */
-  cursor: pointer;
-  font-size: 14px;
-  color: #44e233 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* Espacio entre el checkbox y el texto */
+    cursor: pointer;
+    font-size: 14px;
+    color: #44e233 !important;
 }
 
 .word-generate {
-  display: flex;
-  flex-wrap: wrap;       /* Permite que los elementos bajen a la siguiente línea si no caben */
-  gap: 12px;             /* Espacio uniforme entre cada palabra/tarjeta */
-  padding: 16px;
-  justify-content: left; /* Centra las palabras (puedes cambiarlo a 'flex-start' si prefieres alinearlas a la izquierda) */
+    display: flex;
+    flex-wrap: wrap;
+    /* Permite que los elementos bajen a la siguiente línea si no caben */
+    gap: 12px;
+    /* Espacio uniforme entre cada palabra/tarjeta */
+    padding: 16px;
+    justify-content: left;
+    /* Centra las palabras (puedes cambiarlo a 'flex-start' si prefieres alinearlas a la izquierda) */
 }
 
 .word {
-  background-color: #f0f4f8; /* Color de fondo suave (estilo tarjeta) */
-  color: #333333;            /* Color del texto */
-  padding: 10px 16px;        /* Espacio interno para que no se vea apretado */
-  border-radius: 8px;        /* Bordes redondeados modernos */
-  font-size: 14px;
-  font-weight: 500;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Sutil sombra para dar profundidad */
-  border: 1px solid #e2e8f0; /* Borde sutil */
-  transition: transform 0.2s ease, background-color 0.2s ease;
+    background-color: #f0f4f8;
+    /* Color de fondo suave (estilo tarjeta) */
+    color: #333333;
+    /* Color del texto */
+    padding: 10px 16px;
+    /* Espacio interno para que no se vea apretado */
+    border-radius: 8px;
+    /* Bordes redondeados modernos */
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    /* Sutil sombra para dar profundidad */
+    border: 1px solid #e2e8f0;
+    /* Borde sutil */
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.table-elegante {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 14px;
+    background-color: #333;
+    border: 1px solid #414040;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.table-elegante th,
+.table-elegante td {
+    border: 1px solid #414040;
+    padding: 12px 16px;
+}
+
+.table-elegante th {
+    color: #62c0f4;
+    text-align: left;
+    text-transform: uppercase;
+    
+}
+
+.table-elegante td {
+    background-color: #333333;
+    color: #44e233;
+}
+
+.table-elegante td:first-child {
+    text-align: center;
+    font-size: 22px;
+}
+
+.input-text{
+    padding: 10px;
+}
+
+.oculto-text{
+    visibility: hidden;
+}
+
+.controls{
+    display: flex;
+}
+
+.controls>*{
+    margin-right:5px;
 }
 
 @media screen and (width <=768px) {
     #mundo {
         width: 79vw;
     }
+}
+
+/*Dibujo*/
+.app {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 20px;
+
+  box-sizing: border-box;
+
+  font-family: Arial, sans-serif;
+  background: #f3f3f3;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+.canvas-container {
+  width: 500px;
+  height: 800px;
+
+  background: white;
+
+  border: 2px solid #222;
+  border-radius: 8px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+canvas {
+  display: block;
+
+  width: 500px;
+  height: 800px;
+
+  background: white;
+
+  /*
+   * Muy importante para dispositivos táctiles.
+   * Evita que el navegador haga scroll/zoom
+   * mientras el usuario está dibujando.
+   */
+  touch-action: none;
+
+  cursor: crosshair;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+
+  margin-top: 20px;
+}
+
+button {
+  padding: 10px 18px;
+
+  border: none;
+  border-radius: 6px;
+
+  background: #222;
+  color: white;
+
+  font-size: 15px;
+
+  cursor: pointer;
+}
+
+button:hover {
+  background: #444;
+}
+
+.info {
+  margin-top: 15px;
+
+  padding: 10px 20px;
+
+  background: white;
+
+  border-radius: 6px;
+
+  font-size: 18px;
 }

@@ -19,14 +19,17 @@
                 <div class="row-universo">
                     <label>Menu:</label>
                     <div class="btn-group-four">
-                        <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faBrain"></fa-icon></button>
-                        <button class="square-btn light-txt"><fa-icon size="2x"
+                        <button class="square-btn light-txt" (click)="selectJuego('creatividad')"><fa-icon size="2x"
                                 [icon]="faUserSecret"></fa-icon></button>
-                        <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faBug"></fa-icon></button>
-                        <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faShrimp"></fa-icon></button>
+                        <button class="square-btn light-txt" (click)="selectJuego('memoria')"><fa-icon size="2x"
+                                [icon]="faBrain"></fa-icon></button>
+                        <button class="square-btn light-txt" (click)="selectJuego('matematicas')"><fa-icon size="2x"
+                                [icon]="faBug"></fa-icon></button>
+                        <button class="square-btn light-txt" (click)="selectJuego('dibujo')"><fa-icon size="2x"
+                                [icon]="faShrimp"></fa-icon></button>
                     </div>
                 </div>
-                <div id="creatividad-div">
+                <div id="creatividad-div" [hidden]="!creatividad">
                     <div class="control-panel-v2">
                         <div class="section-block">
                             <div class="row-full-select">
@@ -102,6 +105,84 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div [hidden]="!memoria">
+                    <table class="table-elegante">
+                        <thead>
+                            <tr>
+                                <th>id</th>
+                                <th>em</th>
+                                <th>Key</th>
+                                <th>Palabra</th>
+                                <th class="controls">
+                                    <button class="square-btn light-txt" (click)="ocultarTodasPalabra()"><fa-icon
+                                            size="2x" [icon]="faEye"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="alternarPalabra()"><fa-icon size="2x"
+                                            [icon]="faArrowsSpin"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="escribirTodaHistoria()"><fa-icon
+                                            size="2x" [icon]="faBookOpen"></fa-icon></button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of tablaMemoria(); track item.id) {
+                            <tr>
+                                <td style="background-color: rgb(255, 255, 255);"><span
+                                        style="font-size: 58px; transform: scale(1.5); display: inline-block;"
+                                        [innerHTML]="item.emogi"></span></td>
+                                <td>{{item.id}}</td>
+                                <td>{{item.key}}</td>
+                                <td><input type="text" class="input-text" id="text{{item.id}}"></td>
+                                <td class="controls"><button class="square-btn light-txt"
+                                        [attr.data-id]="'text' + item.id" (click)="ocultarPalabra($event)"><fa-icon
+                                            size="2x" [icon]="faEye"></fa-icon></button>
+                                    <button class="square-btn light-txt" [attr.data-id]="'text' + item.id"
+                                        (click)="escribirHistoria($event)"><fa-icon size="2x"
+                                            [icon]="faBookOpen"></fa-icon></button>
+                                </td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="5">-Vacio-</td>
+                            </tr>
+                            }
+                    </table>
+
+                </div>
+
+                <div [hidden]="!matematicas">
+
+                </div>
+
+                <div [hidden]="!dibujo">
+
+                    <div class="app">
+                        <h2>Canvas de dibujo</h2>
+
+                        <div class="canvas-container">
+                            <canvas #canvas width="500" height="800" (pointerdown)="startDrawing($event)"
+                                (pointermove)="draw($event)" (pointerup)="stopDrawing()" (pointercancel)="stopDrawing()"
+                                (pointerleave)="stopDrawing()">
+                            </canvas>
+                        </div>
+
+                        <div class="controls">
+                            <button (click)="generateRandomCharacter()">
+                                Nuevo carácter
+                            </button>
+
+                            <button (click)="clearDrawing()">
+                                Limpiar dibujo
+                            </button>
+                        </div>
+
+                        <div class="info">
+                            <strong>Carácter:</strong>
+                            {{ randomCharacter }}
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
