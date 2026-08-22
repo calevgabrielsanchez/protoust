@@ -158,28 +158,23 @@
                 <div [hidden]="!dibujo">
 
                     <div class="app">
-                        <h2>Canvas de dibujo</h2>
+                        <div class="controls">
+                            <button (click)="generateRandomCharacter()" class="square-btn light-txt">
+                                <fa-icon size="2x"
+                                            [icon]="faTextHeight"></fa-icon>
+                            </button>
+
+                            <button (click)="clearDrawing()" class="square-btn light-txt">
+                                <fa-icon size="2x"
+                                            [icon]="faEraser"></fa-icon>
+                            </button>
+                        </div>
 
                         <div class="canvas-container">
-                            <canvas #canvas width="500" height="800" (pointerdown)="startDrawing($event)"
+                            <canvas #canvas width="800px" height="800px" (pointerdown)="startDrawing($event)"
                                 (pointermove)="draw($event)" (pointerup)="stopDrawing()" (pointercancel)="stopDrawing()"
                                 (pointerleave)="stopDrawing()">
                             </canvas>
-                        </div>
-
-                        <div class="controls">
-                            <button (click)="generateRandomCharacter()">
-                                Nuevo carácter
-                            </button>
-
-                            <button (click)="clearDrawing()">
-                                Limpiar dibujo
-                            </button>
-                        </div>
-
-                        <div class="info">
-                            <strong>Carácter:</strong>
-                            {{ randomCharacter }}
                         </div>
                     </div>
 

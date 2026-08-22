@@ -2,7 +2,8 @@ import { Component, inject, Signal, signal } from '@angular/core';
 import {
   faSave, faFileHalfDashed, faGlobe, faBook, faEarthAmericas, faScroll, faImage,
   faCircleInfo, faSquarePlus, faBaby, faDragon, faMeteor, faSkullCrossbones, faTrashCan, faPenFancy,
-  faDownload, faUpload, faRefresh, faBrain, faBug, faUserSecret, faShrimp, faArrowsSpin, faEye, faBookOpen
+  faDownload, faUpload, faRefresh, faBrain, faBug, faUserSecret, faShrimp, faArrowsSpin, faEye,
+   faBookOpen, faEraser, faTextHeight
 } from '@fortawesome/free-solid-svg-icons';
 import { TextPlusComponent } from '../text-plus.component/text-plus.component';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
@@ -59,6 +60,8 @@ export class CreatividadComponent {
   faArrowsSpin = faArrowsSpin;
   faEye = faEye
   faBookOpen = faBookOpen;
+  faEraser = faEraser;
+faTextHeight=faTextHeight;
 
   mostrarTextPlus: boolean = false;
   textoAEditar: string = "";
@@ -462,7 +465,7 @@ export class CreatividadComponent {
   randomCharacter = '';
 
   characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"#$%&/()=?¡¿*+{}-_.:,;<>|@';
 
   // ============================================================
   // OBTENER CANVAS
@@ -632,7 +635,7 @@ export class CreatividadComponent {
      * al 58% del área.
      */
 
-    const fontSize = 570;
+    const fontSize = 450;
 
 
     context.save();
@@ -991,7 +994,7 @@ export class CreatividadComponent {
 
 
       context.font =
-        'bold 570px Arial';
+        'bold 450px Arial';
 
 
       context.textAlign =
