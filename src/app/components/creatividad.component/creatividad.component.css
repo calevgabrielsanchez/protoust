@@ -399,7 +399,8 @@ textarea:focus {
 .table-elegante th,
 .table-elegante td {
     border: 1px solid #414040;
-    padding: 12px 16px;
+    padding: 0px 10px;
+    text-align: center;
 }
 
 .table-elegante th {
@@ -522,4 +523,17 @@ button:hover {
   border-radius: 6px;
 
   font-size: 18px;
+}
+
+.contenedor-inputs-mat {
+  display: flex;          /* Coloca los elementos en una sola línea */
+  width: 100%;            /* El div ocupa todo el ancho de su contenedor padre */
+  gap: 10px;              /* Espacio opcional de separación entre cada input */
+}
+
+.contenedor-inputs-mat input {
+  flex: 1;                /* Hace que cada input crezca y ocupe el mismo espacio */
+  width: 0;               /* Truco técnico de Flexbox para evitar que se desborden si el texto es largo */
+  padding: 8px;           /* Un poco de estética interior */
+  box-sizing: border-box; /* Asegura que los paddings no rompan el ancho total */
 }

@@ -1,9 +1,11 @@
 import { Component, inject, Signal, signal } from '@angular/core';
 import {
   faSave, faFileHalfDashed, faGlobe, faBook, faEarthAmericas, faScroll, faImage,
-  faCircleInfo, faSquarePlus, faBaby, faDragon, faMeteor, faSkullCrossbones, faTrashCan, faPenFancy,
-  faDownload, faUpload, faRefresh, faBrain, faBug, faUserSecret, faShrimp, faArrowsSpin, faEye,
-   faBookOpen, faEraser, faTextHeight
+  faCircleInfo, faSquarePlus, faBaby, faDragon, faMeteor, faSkullCrossbones, faTrashCan,
+  faPenFancy,
+  faDownload, faUpload, faRefresh, faBrain, faBug, faUserSecret, faShrimp, faArrowsSpin,
+  faEye, faFolderOpen,
+  faBookOpen, faEraser, faTextHeight
 } from '@fortawesome/free-solid-svg-icons';
 import { TextPlusComponent } from '../text-plus.component/text-plus.component';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
@@ -29,6 +31,7 @@ import {
 export class CreatividadComponent {
 
   camposSemanticos: FormGroup;
+  controlesTienda: FormGroup;
   ejercicio = [];
   descripcionEjercicioSeleccionado: string = "";
   descripcionArquetipoSeleccionado: string = "";
@@ -61,7 +64,8 @@ export class CreatividadComponent {
   faEye = faEye
   faBookOpen = faBookOpen;
   faEraser = faEraser;
-faTextHeight=faTextHeight;
+  faTextHeight = faTextHeight;
+  faFolderOpen = faFolderOpen;
 
   mostrarTextPlus: boolean = false;
   textoAEditar: string = "";
@@ -76,6 +80,12 @@ faTextHeight=faTextHeight;
 
   inputId: number = 0;
 
+  resultadoTienda: number = 0;
+  operacionResultado: string = '';
+  //=========================================================
+  //                FUNCIONES
+  //=========================================================
+
   constructor() {
     this.camposSemanticos = new FormGroup({
       animales: new FormControl(false),
@@ -88,8 +98,20 @@ faTextHeight=faTextHeight;
       sustantivos: new FormControl(false),
       transporte: new FormControl(false),
       verbos: new FormControl(false),
-      varias: new FormControl(false)
+      varias: new FormControl(false),
+      todas: new FormControl(false)
     });
+
+    this.controlesTienda = new FormGroup({
+      decimal: new FormControl(false),
+      tienda: new FormControl(false),
+      suma: new FormControl(true),
+      resta: new FormControl(false),
+      multiplicacion: new FormControl(false),
+      divicion: new FormControl(false),
+      juegoSeleccionada: new FormControl('operaciones')
+    });
+
   }
 
   ngOnInit() {
@@ -121,14 +143,7 @@ faTextHeight=faTextHeight;
     this.historia[this.inputId - 1] = this.textoAEditar;
     console.log(this.textoAEditar)
     this.mostrarTextPlus = false;
-    /* const elementoTextarea = elementotareaSeleccionada();
- 
-     if (elementoTextarea) {
-       elementoTextarea.value = this.textoAEditar;
-       elementoTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-     }
- 
-     this.closeTextPlus(this.textoAEditar);*/
+
   }
 
   abrirEditarText() {
@@ -143,7 +158,9 @@ faTextHeight=faTextHeight;
   onClickMente() {
     window.location.href = '/mente';
   }
-
+  //==========================================================
+  //                       Ejercicios Creatividad
+  //=========================================================
   onGenerarPalabras() {
 
     let numeroMsg = prompt("Ingrese el número de palabras a generar:", "5");
@@ -160,6 +177,7 @@ faTextHeight=faTextHeight;
     const transporte = this.camposSemanticos.get('transporte')?.value;
     const verbos = this.camposSemanticos.get('verbos')?.value;
     const varias = this.camposSemanticos.get('varias')?.value;
+    const todas = this.camposSemanticos.get('todas')?.value;
 
     let peticiones: any = {};
 
@@ -175,6 +193,7 @@ faTextHeight=faTextHeight;
     if (transporte) peticiones.transporte = this.http.get('/csv/transporte.csv', { responseType: 'text' });
     if (verbos) peticiones.verbos = this.http.get('/csv/verbos.csv', { responseType: 'text' });
     if (varias) peticiones.varias = this.http.get('/csv/varias.csv', { responseType: 'text' });
+    if (todas) peticiones.todas = this.http.get('/csv/todasPalabras.csv', { responseType: 'text' });
 
     // Si ninguna casilla está seleccionada, vaciamos el signal y salimos
     if (Object.keys(peticiones).length === 0) {
@@ -230,6 +249,11 @@ faTextHeight=faTextHeight;
         }
         if (resultados.varias) {
           const datos = this.convertirCsvAObjeto(resultados.varias);
+          listaPalabras.push(...this.obtenerElementosAleatorios(datos, numero));
+        }
+
+        if (resultados.todas) {
+          const datos = this.convertirCsvAObjeto(resultados.todas);
           listaPalabras.push(...this.obtenerElementosAleatorios(datos, numero));
         }
 
@@ -338,8 +362,8 @@ faTextHeight=faTextHeight;
 
   creatividad: boolean = false;
   memoria: boolean = false;
-  matematicas: boolean = false;
-  dibujo: boolean = true;
+  matematicas: boolean = true;
+  dibujo: boolean = false;
   selectJuego(juego: string) {
     this.creatividad = false;
     this.memoria = false;
@@ -360,7 +384,23 @@ faTextHeight=faTextHeight;
         break;
     }
   }
-  //-----------------------------------------------------Memoria-----------------------------------------------------
+
+  onEscribirEjercicioCreatividad() {
+    this.mostrarTextPlus = true;
+    let ejercicioTextInput = document.getElementById("ejercicio") as HTMLSelectElement;
+    let titulo = ejercicioTextInput.options[ejercicioTextInput.selectedIndex].text;
+    let arquetipoTextInput = document.getElementById("arquetipo") as HTMLSelectElement;
+    let arquetipo = arquetipoTextInput.options[arquetipoTextInput.selectedIndex].text;
+    let palabras = this.palabras().map(p => p.palabra).join("\n");
+    this.textoAEditar = "#" + titulo + "\n" + this.descripcionEjercicioSeleccionado + "\n" +
+      "#" + arquetipo + "\n" + this.descripcionArquetipoSeleccionado + "\n" +
+      "#Palabras" + "\n" + palabras + "\n ----------------------Empieza----------------------";
+    console.log(this.textoAEditar);
+  }
+
+  //=============================================================
+  //---------------------------Memoria-------------------------------
+  //===============================================================
   tablaMemoria = signal<any[]>([]);
   crearTablaMemoria() {
     let peticionesMemori: any = {};
@@ -403,9 +443,9 @@ faTextHeight=faTextHeight;
           this.historia = [];
 
           inputs.forEach((input, i) => {
-            (input as HTMLInputElement).value = palabrasAleatorias[i].todasPalabras;
-            this.historia.push(palabrasAleatorias[i].todasPalabras);
-            console.log(palabrasAleatorias[i].todasPalabras);
+            (input as HTMLInputElement).value = palabrasAleatorias[i].palabra;
+            this.historia.push(palabrasAleatorias[i].palabra);
+            console.log(palabrasAleatorias[i].palabra);
           });
         },
         error: (err) => {
@@ -1037,6 +1077,215 @@ faTextHeight=faTextHeight;
   nuevoCaracter(): void {
 
     this.generateRandomCharacter();
+  }
+
+  // ============================================================
+  // MATEMATICAS
+  // ============================================================
+
+  generarJuegMatematicTienda() {
+    const decimal = this.controlesTienda.get('decimal')?.value;
+    const tienda = this.controlesTienda.get('tienda')?.value;
+    const suma = this.controlesTienda.get('suma')?.value;
+    const resta = this.controlesTienda.get('resta')?.value;
+    const multiplicacion = this.controlesTienda.get('multiplicacion')?.value;
+    const divicion = this.controlesTienda.get('divicion')?.value;
+
+    let operaciones = ['+', '-', '*', '/'];
+    let aleatorioOperaciones = []
+
+    if (suma) { aleatorioOperaciones.push(0); }
+    if (resta) aleatorioOperaciones.push(1);
+    if (multiplicacion) aleatorioOperaciones.push(2);
+    if (divicion) aleatorioOperaciones.push(3);
+    const indiceAleatorio = Math.floor(Math.random() * aleatorioOperaciones.length);
+    const valorAleatorio = aleatorioOperaciones[indiceAleatorio];
+
+    const operacion = operaciones[valorAleatorio];
+
+    let numero1 = 0;
+    let numero2 = 0;
+    let resultado = 0;
+    if (decimal) {
+      const numeroAleatorio: number = Number((Math.random() * (99.9 - 10.0) + 10.0).toFixed(1));
+      numero1 = tienda ? this.resultadoTienda : numeroAleatorio;
+      const numeroAleatorio2: number = Number((Math.random() * (99.9 - 10.0) + 10.0).toFixed(1));
+      numero2 = numeroAleatorio2;
+    } else {
+      const numeroAleatorio3: number = Math.floor(Math.random() * 99) + 1;
+      numero1 = tienda ? this.resultadoTienda : numeroAleatorio3;
+      const numeroAleatorio4: number = Math.floor(Math.random() * 99) + 1;
+      numero2 = numeroAleatorio4;
+      console.log(numero1, numero2)
+    }
+
+    switch (operacion) {
+      case '+':
+        resultado = numero1 + numero2
+        break;
+      case '-':
+        resultado = numero1 - numero2
+        break;
+      case '*':
+        resultado = numero1 * numero2
+        break;
+      case '/':
+        resultado = numero1 / numero2
+        break;
+    }
+    this.resultadoTienda = resultado;
+
+    const inputText1 = document.getElementById('numero1');
+    (inputText1 as HTMLInputElement).value = numero1.toString();
+    const inputText2 = document.getElementById('numero2');
+    (inputText2 as HTMLInputElement).value = numero2.toString();
+    const operacionText = document.getElementById('operacion');
+    (operacionText as HTMLInputElement).value = operacion;
+    const resultadoText = document.getElementById('resultado');
+    (resultadoText as HTMLInputElement).value = '';
+  }
+
+  mostrarResultado() {
+    alert(this.resultadoTienda);
+  }
+
+  onEnterResultadoTienda() {
+    const resultadoText = document.getElementById('resultado');
+    const resultado = (resultadoText as HTMLInputElement).value;
+    if (parseFloat(resultado) == this.resultadoTienda || this.operacionResultado == resultado) {
+      (resultadoText as HTMLInputElement).value = '';
+    } else {
+      alert("Te fallo amigo, vuelve a intentarlo. ntp.");
+      (resultadoText as HTMLInputElement).value = '';
+    }
+
+  }
+  generarJuegMatematicPorcentaje() {
+    const decimal = this.controlesTienda.get('decimal')?.value;
+
+    let numero1 = 0;
+    let numero2 = 0;
+    let resultado = 0;
+    if (decimal) {
+      const numeroAleatorio: number = Number((Math.random() * (99.9 - 10.0) + 10.0).toFixed(1));
+      numero1 = numeroAleatorio;
+      const numeroAleatorio2: number = Math.floor(Math.random() * 10) + 1;
+      numero2 = numeroAleatorio2;
+    } else {
+      const numeroAleatorio3: number = Math.floor(Math.random() * 99) + 1;
+      numero1 = numeroAleatorio3;
+      const numeroAleatorio4: number = Math.floor(Math.random() * 10) + 1;
+      numero2 = numeroAleatorio4;
+    }
+
+    resultado = (numero2 / 100) * numero1;
+
+    const inputText1 = document.getElementById('numero1');
+    (inputText1 as HTMLInputElement).value = numero2.toString();
+    const inputText2 = document.getElementById('numero2');
+    (inputText2 as HTMLInputElement).value = numero1.toString();
+    const operacionText = document.getElementById('operacion');
+    (operacionText as HTMLInputElement).value = '%';
+    const resultadoText = document.getElementById('resultado');
+    (resultadoText as HTMLInputElement).value = '';
+
+    this.resultadoTienda = parseFloat((resultado).toFixed(1));
+  }
+
+  generarJuegMatematicRaiz() {
+    const numeroAleatorio3: number = Math.floor(Math.random() * 99) + 1;
+    const resultado = Math.sqrt(numeroAleatorio3);
+    const inputText1 = document.getElementById('numero1');
+    (inputText1 as HTMLInputElement).value = numeroAleatorio3.toString();
+    const operacionText = document.getElementById('operacion');
+    (operacionText as HTMLInputElement).value = 'Raiz';
+    const inputText2 = document.getElementById('numero2');
+    (inputText2 as HTMLInputElement).value = '';
+    this.resultadoTienda = parseFloat((resultado).toFixed(1));
+    const resultadoText = document.getElementById('resultado');
+    (resultadoText as HTMLInputElement).value = '';
+  }
+
+  generarJuegMatematicCompletar() {
+    const decimal = this.controlesTienda.get('decimal')?.value;
+    const tienda = this.controlesTienda.get('tienda')?.value;
+    const suma = this.controlesTienda.get('suma')?.value;
+    const resta = this.controlesTienda.get('resta')?.value;
+    const multiplicacion = this.controlesTienda.get('multiplicacion')?.value;
+    const divicion = this.controlesTienda.get('divicion')?.value;
+
+    let operaciones = ['+', '-', '*', '/'];
+    let aleatorioOperaciones = []
+
+    if (suma) { aleatorioOperaciones.push(0); }
+    if (resta) aleatorioOperaciones.push(1);
+    if (multiplicacion) aleatorioOperaciones.push(2);
+    if (divicion) aleatorioOperaciones.push(3);
+    const indiceAleatorio = Math.floor(Math.random() * aleatorioOperaciones.length);
+    const valorAleatorio = aleatorioOperaciones[indiceAleatorio];
+
+    const operacion = operaciones[valorAleatorio];
+
+    let numero1 = 0;
+    let numero2 = 0;
+    let resultado = 0;
+    if (decimal) {
+      const numeroAleatorio: number = Number((Math.random() * (99.9 - 10.0) + 10.0).toFixed(1));
+      numero1 = tienda ? this.resultadoTienda : numeroAleatorio;
+      const numeroAleatorio2: number = Number((Math.random() * (99.9 - 10.0) + 10.0).toFixed(1));
+      numero2 = numeroAleatorio2;
+    } else {
+      const numeroAleatorio3: number = Math.floor(Math.random() * 99) + 1;
+      numero1 = tienda ? this.resultadoTienda : numeroAleatorio3;
+      const numeroAleatorio4: number = Math.floor(Math.random() * 99) + 1;
+      numero2 = numeroAleatorio4;
+      console.log(numero1, numero2)
+    }
+
+    switch (operacion) {
+      case '+':
+        resultado = numero1 + numero2
+        break;
+      case '-':
+        resultado = numero1 - numero2
+        break;
+      case '*':
+        resultado = numero1 * numero2
+        break;
+      case '/':
+        resultado = numero1 / numero2
+        break;
+    }
+    this.resultadoTienda = -1;
+    this.operacionResultado = operacion;
+
+    const inputText1 = document.getElementById('numero1');
+    (inputText1 as HTMLInputElement).value = numero1.toString();
+    const inputText2 = document.getElementById('numero2');
+    (inputText2 as HTMLInputElement).value = resultado.toString();
+    const operacionText = document.getElementById('operacion');
+    (operacionText as HTMLInputElement).value = numero2.toString();
+    const resultadoText = document.getElementById('resultado');
+    //(resultadoText as HTMLInputElement).value = ;
+  }
+
+  generarJuegMatematic() {
+    const operacionElegida = this.controlesTienda.get('juegoSeleccionada')?.value;
+    console.log(operacionElegida)
+    switch (operacionElegida) {
+      case 'operaciones':
+        this.generarJuegMatematicTienda();
+        break;
+      case 'raiz':
+        this.generarJuegMatematicRaiz();
+        break;
+      case 'porcentaje':
+        this.generarJuegMatematicPorcentaje();
+        break;
+      case 'completar':
+        this.generarJuegMatematicCompletar();
+        break;
+    }
   }
 
 }
