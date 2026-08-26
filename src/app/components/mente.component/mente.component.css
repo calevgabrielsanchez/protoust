@@ -337,3 +337,11 @@ textarea:focus {
         width: 79vw;
     }
 }
+
+.input-cell>input{
+    padding: 5px 3px;
+}
+
+.input-cell{
+    margin-top: 10px;
+}

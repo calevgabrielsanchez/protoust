@@ -7,5 +7,5 @@ import { MenteComponent } from './components/mente.component/mente.component';
 export const routes: Routes = [
     {path:'', component: MainComponent},
     {path:'creatividad', component: CreatividadComponent},
-    {path:'mente', component: MenteComponent},
+    {path:'mente', component: MenteComponent}
 ];

@@ -1,0 +1,12 @@
+export interface Valores {
+    id: string
+    nombre: string
+    descripcion: string
+    frase: string
+
+    creatura: string
+ 
+    detalles: string
+    imagen: string
+
+}

@@ -23,7 +23,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faSave, faFileHalfDashed, faGlobe, faBook, faEarthAmericas, faScroll, faImage,
   faCircleInfo, faSquarePlus, faBaby, faDragon, faMeteor, faSkullCrossbones, faTrashCan, faPenFancy,
-  faDownload, faUpload, faRefresh, faLevelDown
+  faDownload, faUpload, faRefresh, faLevelDown, faPersonDressBurst
 } from '@fortawesome/free-solid-svg-icons';
 
 
@@ -57,6 +57,8 @@ export class MainComponent {
   faUpload = faUpload;
   faRefresh = faRefresh;
   faLevelDown = faLevelDown;
+faPersonDressBurst=faPersonDressBurst;
+
   /*****************************************
    * Variables Internas
    * ***************************************
