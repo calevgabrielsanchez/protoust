@@ -9,4 +9,7 @@ export interface Emociones {
     detalles: string
     imagen: string
 
+    updatedAt: number;
+    _deleted: boolean;
+
 }

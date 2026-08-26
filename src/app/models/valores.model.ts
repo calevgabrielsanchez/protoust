@@ -8,5 +8,6 @@ export interface Valores {
  
     detalles: string
     imagen: string
-
+updatedAt: number;
+    _deleted: boolean;
 }

@@ -9,4 +9,7 @@ export interface Miedos {
     detalles: string
     imagen: string
 
+    updatedAt: number;
+    _deleted: boolean;
+
 }

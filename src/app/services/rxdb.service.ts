@@ -5,7 +5,8 @@ import { replicateRxCollection, RxReplicationState } from 'rxdb/plugins/replicat
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import {
     UNIVERSO_SCHEMA, MUNDO_SCHEMA, CULTURA_SCHEMA, PERSONAJE_SCHEMA, CREATURA_SCHEMA,
-    SAGA_SCHEMA, TOMO_SCHEMA, INDICE_SCHEMA, CONTENIDO_INDICE_SCHEMA
+    SAGA_SCHEMA, TOMO_SCHEMA, INDICE_SCHEMA, CONTENIDO_INDICE_SCHEMA,
+    PERSONALIDAD_SCHEMA, VALORES_SCHEMA, MIEDOS_SCHEMA, EMOCIONES_SCHEMA, MEMORIA_SCHEMA
 } from '../db/protoust.schemas';
 import { BehaviorSubject } from 'rxjs';
 import { Universo } from '../models/universo.model';
@@ -17,6 +18,11 @@ import { Saga } from '../models/saga.model';
 import { Tomo } from '../models/tomo.model';
 import { Indice } from '../models/indice.model';
 import { ContenidoIndice } from '../models/contenidoIndice.model';
+import { Personalidad } from '../models/personalidad.model';
+import { Valores } from '../models/valores.model';
+import { Miedos } from '../models/miedos.model';
+import { Emociones } from '../models/emociones.modelo';
+import { Memoria } from '../models/memoria.modelo';
 
 @Injectable({
     providedIn: 'root'
@@ -40,6 +46,11 @@ export class RxdbService {
         tomo?: RxReplicationState<Tomo, any>;
         indice?: RxReplicationState<Indice, any>;
         contenidoIndice?: RxReplicationState<ContenidoIndice, any>;
+        personalidad?: RxReplicationState<Personalidad, any>;
+        valores?: RxReplicationState<Valores, any>;
+        miedos?: RxReplicationState<Miedos, any>;
+        emociones?: RxReplicationState<Emociones, any>;
+        memoria?: RxReplicationState<Memoria, any>;
     } = {};
 
     // Canales reactivos para que los componentes de Angular escuchen los datos
@@ -52,6 +63,11 @@ export class RxdbService {
     public tomo$ = new BehaviorSubject<Tomo[]>([]);
     public indice$ = new BehaviorSubject<Indice[]>([]);
     public contenidoIndice$ = new BehaviorSubject<ContenidoIndice[]>([]);
+    public personalidad$ = new BehaviorSubject<Personalidad[]>([]);
+    public valores$ = new BehaviorSubject<Valores[]>([]);
+    public miedos$ = new BehaviorSubject<Miedos[]>([]);
+    public emociones$ = new BehaviorSubject<Emociones[]>([]);
+    public memoria$ = new BehaviorSubject<Memoria[]>([]);
 
     private colecciones!: {
         universo: RxCollection<Universo>;
@@ -63,6 +79,11 @@ export class RxdbService {
         tomo: RxCollection<Tomo>;
         indice: RxCollection<Indice>;
         contenidoIndice: RxCollection<ContenidoIndice>;
+        personalidad: RxCollection<Personalidad>;
+        valores: RxCollection<Valores>;
+        miedos: RxCollection<Miedos>;
+        emociones: RxCollection<Emociones>;
+        memoria: RxCollection<Memoria>;
     };
 
     constructor() {
@@ -103,7 +124,12 @@ export class RxdbService {
             saga: { schema: SAGA_SCHEMA },
             tomo: { schema: TOMO_SCHEMA },
             indice: { schema: INDICE_SCHEMA },
-            contenidoIndice: { schema: CONTENIDO_INDICE_SCHEMA }
+            contenidoIndice: { schema: CONTENIDO_INDICE_SCHEMA },
+            personalidad: { schema: PERSONALIDAD_SCHEMA },
+            valores: { schema: VALORES_SCHEMA },
+            miedos: { schema: MIEDOS_SCHEMA },
+            emociones: { schema: EMOCIONES_SCHEMA },
+            memoria: { schema: MEMORIA_SCHEMA }
         });
 
         // 3. Suscribirse a los datos locales activos (mapeando a _deleted nativo de RxDB)
@@ -152,6 +178,31 @@ export class RxdbService {
             this.contenidoIndice$.next(data);
         });
 
+        this.colecciones.personalidad.find({ selector: { _deleted: false } }).$.subscribe(docs => {
+            const data = docs.map(d => d.toJSON() as Personalidad);
+            this.personalidad$.next(data);
+        });
+
+        this.colecciones.valores.find({ selector: { _deleted: false } }).$.subscribe(docs => {
+            const data = docs.map(d => d.toJSON() as Valores);
+            this.valores$.next(data);
+        });
+
+        this.colecciones.miedos.find({ selector: { _deleted: false } }).$.subscribe(docs => {
+            const data = docs.map(d => d.toJSON() as Miedos);
+            this.miedos$.next(data);
+        });
+
+        this.colecciones.emociones.find({ selector: { _deleted: false } }).$.subscribe(docs => {
+            const data = docs.map(d => d.toJSON() as Emociones);
+            this.emociones$.next(data);
+        });
+
+        this.colecciones.memoria.find({ selector: { _deleted: false } }).$.subscribe(docs => {
+            const data = docs.map(d => d.toJSON() as Memoria);
+            this.memoria$.next(data);
+        });
+
         this.inicializarReplicacionSupabase();
         await this.verificarConexionLocal();
     }
@@ -166,6 +217,11 @@ export class RxdbService {
         this.sincronizarTomo(this.colecciones.tomo);
         this.sincronizarIndice(this.colecciones.indice);
         this.sincronizarContenidoIndice(this.colecciones.contenidoIndice);
+        this.sincronizarPersonalidad(this.colecciones.personalidad);
+        this.sincronizarValores(this.colecciones.valores);
+        this.sincronizarMiedos(this.colecciones.miedos);
+        this.sincronizarEmociones(this.colecciones.emociones);
+        this.sincronizarMemoria(this.colecciones.memoria);
     }
 
     async verificarConexionLocal() {
@@ -260,6 +316,21 @@ export class RxdbService {
         if (reconstruir(this.replicas.contenidoIndice)) {
             this.replicas.contenidoIndice = this.sincronizarContenidoIndice(this.colecciones.contenidoIndice);
         }
+        if (reconstruir(this.replicas.personalidad)) {
+            this.replicas.personalidad = this.sincronizarPersonalidad(this.colecciones.personalidad);
+        }
+        if (reconstruir(this.replicas.valores)) {
+            this.replicas.valores = this.sincronizarValores(this.colecciones.valores);
+        }
+        if (reconstruir(this.replicas.miedos)) {
+            this.replicas.miedos = this.sincronizarMiedos(this.colecciones.miedos);
+        }
+        if (reconstruir(this.replicas.emociones)) {
+            this.replicas.emociones = this.sincronizarEmociones(this.colecciones.emociones);
+        }
+        if (reconstruir(this.replicas.memoria)) {
+            this.replicas.memoria = this.sincronizarMemoria(this.colecciones.memoria);
+        }
     }
 
     private async esperarSincronizacion(estado: RxReplicationState<any, any>): Promise<void> {
@@ -295,7 +366,7 @@ export class RxdbService {
         }
 
         try {
-            const [universos, mundos, culturas, personajes, creaturas, sagas, tomos, indices, contenidos] = await Promise.all([
+            const [universos, mundos, culturas, personajes, creaturas, sagas, tomos, indices, contenidos, personalidades, valoresList, miedosList, emocionesList, memorias] = await Promise.all([
                 this.traerRegistros('universo', r => ({
                     id: r.id,
                     nombre: r.nombre,
@@ -426,6 +497,107 @@ export class RxdbService {
                     nombre: r.nombre,
                     updatedAt: Number(r.updated_at),
                     _deleted: false
+                })),
+                this.traerRegistros('personalidad', r => ({
+                    id: r.id,
+                    detalles: r.detalles,
+                    imagen: r.imagen,
+                    mbti: r.mbti,
+                    colorForma: r.color_forma,
+                    oficio: r.oficio,
+                    descripcion: r.descripcion,
+                    comoSon: r.como_son,
+                    cualidad: r.cualidad,
+                    dondeEncaja: r.donde_encaja,
+                    habilidad: r.habilidad,
+                    valores: r.valores,
+                    pareja: r.pareja,
+                    traumas: r.traumas,
+                    enfermedad: r.enfermedad,
+                    danan: r.danan,
+                    CaleVRije: r.cale_v_rije,
+                    funcion: r.funcion,
+                    grupo: r.grupo,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
+                })),
+                this.traerRegistros('valores', r => ({
+                    id: r.id,
+                    nombre: r.nombre,
+                    descripcion: r.descripcion,
+                    frase: r.frase,
+                    creatura: r.creatura,
+                    detalles: r.detalles,
+                    imagen: r.imagen,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
+                })),
+                this.traerRegistros('miedos', r => ({
+                    id: r.id,
+                    nombre: r.nombre,
+                    descripcion: r.descripcion,
+                    frase: r.frase,
+                    creatura: r.creatura,
+                    detalles: r.detalles,
+                    imagen: r.imagen,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
+                })),
+                this.traerRegistros('emociones', r => ({
+                    id: r.id,
+                    nombre: r.nombre,
+                    descripcion: r.descripcion,
+                    frase: r.frase,
+                    creatura: r.creatura,
+                    detalles: r.detalles,
+                    imagen: r.imagen,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
+                })),
+                this.traerRegistros('memoria', r => ({
+                    id: r.id,
+                    unoPalabra: r.uno_palabra,
+                    unoDescripcion: r.uno_descripcion,
+                    dosPalabra: r.dos_palabra,
+                    dosDescripcion: r.dos_descripcion,
+                    tresPalabra: r.tres_palabra,
+                    tresDescripcion: r.tres_descripcion,
+                    cuatroPalabra: r.cuatro_palabra,
+                    cuatroDescripcion: r.cuatro_descripcion,
+                    cincoPalabra: r.cinco_palabra,
+                    cincoDescripcion: r.cinco_descripcion,
+                    seisPalabra: r.seis_palabra,
+                    seisDescripcion: r.seis_descripcion,
+                    sietePalabra: r.siete_palabra,
+                    sieteDescripcion: r.siete_descripcion,
+                    ochoPalabra: r.ocho_palabra,
+                    ochoDescripcion: r.ocho_descripcion,
+                    nuevePalabra: r.nueve_palabra,
+                    nueveDescripcion: r.nueve_descripcion,
+                    diezPalabra: r.diez_palabra,
+                    diezDescripcion: r.diez_descripcion,
+                    oncePalabra: r.once_palabra,
+                    onceDescripcion: r.once_descripcion,
+                    docePalabra: r.doce_palabra,
+                    doceDescripcion: r.doce_descripcion,
+                    trecePalabra: r.trece_palabra,
+                    treceDescripcion: r.trece_descripcion,
+                    catorcePalabra: r.catorce_palabra,
+                    catorceDescripcion: r.catorce_descripcion,
+                    quincePalabra: r.quince_palabra,
+                    quinceDescripcion: r.quince_descripcion,
+                    dieciseisPalabra: r.dieciseis_palabra,
+                    dieciseisDescripcion: r.dieciseis_descripcion,
+                    diecisietePalabra: r.diecisiete_palabra,
+                    diecisieteDescripcion: r.diecisiete_descripcion,
+                    dieciochoPalabra: r.dieciocho_palabra,
+                    dieciochoDescripcion: r.dieciocho_descripcion,
+                    diecinuevePalabra: r.diecinueve_palabra,
+                    diecinueveDescripcion: r.diecinueve_descripcion,
+                    veintePalabra: r.veinte_palabra,
+                    veinteDescripcion: r.veinte_descripcion,
+                    updatedAt: Number(r.updated_at),
+                    _deleted: false
                 }))
             ]);
 
@@ -438,7 +610,12 @@ export class RxdbService {
                 saga: sagas,
                 tomo: tomos,
                 indice: indices,
-                contenidoIndice: contenidos
+                contenidoIndice: contenidos,
+                personalidad: personalidades,
+                valores: valoresList,
+                miedos: miedosList,
+                emociones: emocionesList,
+                memoria: memorias
             };
         } catch (error) {
             console.error('Error al descargar desde Supabase:', error);
@@ -1549,6 +1726,280 @@ export class RxdbService {
         return replica;
     }
 
+    private sincronizarPersonalidad(coleccion: RxCollection<Personalidad>): RxReplicationState<Personalidad, any> {
+        const replica = replicateRxCollection<Personalidad, any>({
+            collection: coleccion,
+            replicationIdentifier: 'sync-personalidad-' + this.version,
+            live: false,
+            autoStart: false,
+            retryTime: 4000,
+            push: {
+                handler: async (rows) => {
+                    for (const row of rows) {
+                        await this.supabase.from('personalidad').upsert({
+                            id: row.newDocumentState.id,
+                            detalles: row.newDocumentState.detalles,
+                            imagen: row.newDocumentState.imagen,
+                            mbti: row.newDocumentState.mbti,
+                            color_forma: row.newDocumentState.colorForma,
+                            oficio: row.newDocumentState.oficio,
+                            descripcion: row.newDocumentState.descripcion,
+                            como_son: row.newDocumentState.comoSon,
+                            cualidad: row.newDocumentState.cualidad,
+                            donde_encaja: row.newDocumentState.dondeEncaja,
+                            habilidad: row.newDocumentState.habilidad,
+                            valores: row.newDocumentState.valores,
+                            pareja: row.newDocumentState.pareja,
+                            traumas: row.newDocumentState.traumas,
+                            enfermedad: row.newDocumentState.enfermedad,
+                            danan: row.newDocumentState.danan,
+                            cale_v_rije: row.newDocumentState.CaleVRije,
+                            funcion: row.newDocumentState.funcion,
+                            grupo: row.newDocumentState.grupo,
+                            updated_at: row.newDocumentState.updatedAt,
+                            is_deleted: row.newDocumentState._deleted
+                        });
+                    }
+                    return [];
+                }
+            },
+            pull: {
+                handler: async (lastCheckpoint, batchSize) => {
+                    const checkpoint = lastCheckpoint as { id: string; updatedAt: number } | null;
+                    const lastTime = checkpoint ? checkpoint.updatedAt : 0;
+                    const { data } = await this.supabase.from('personalidad')
+                        .select('*').gt('updated_at', lastTime)
+                        .order('updated_at', { ascending: true }).limit(batchSize);
+                    const docs: Personalidad[] = (data || []).map(r => ({
+                        id: r.id, detalles: r.detalles, imagen: r.imagen, mbti: r.mbti,
+                        colorForma: r.color_forma, oficio: r.oficio, descripcion: r.descripcion,
+                        comoSon: r.como_son, cualidad: r.cualidad, dondeEncaja: r.donde_encaja,
+                        habilidad: r.habilidad, valores: r.valores, pareja: r.pareja,
+                        traumas: r.traumas, enfermedad: r.enfermedad, danan: r.danan,
+                        CaleVRije: r.cale_v_rije, funcion: r.funcion, grupo: r.grupo,
+                        updatedAt: Number(r.updated_at), _deleted: r.is_deleted,
+                    } as Personalidad));
+                    return {
+                        documents: docs,
+                        checkpoint: docs.length > 0 ? { id: docs[docs.length - 1].id, updatedAt: docs[docs.length - 1].updatedAt } : checkpoint
+                    };
+                }
+            }
+        });
+        replica.error$.subscribe(err => console.error('❌ Error en replicación de Personalidad:', err));
+        this.replicas.personalidad = replica;
+        return replica;
+    }
+
+    private sincronizarValores(coleccion: RxCollection<Valores>): RxReplicationState<Valores, any> {
+        const replica = replicateRxCollection<Valores, any>({
+            collection: coleccion,
+            replicationIdentifier: 'sync-valores-' + this.version,
+            live: false, autoStart: false, retryTime: 4000,
+            push: {
+                handler: async (rows) => {
+                    for (const row of rows) {
+                        await this.supabase.from('valores').upsert({
+                            id: row.newDocumentState.id, nombre: row.newDocumentState.nombre,
+                            descripcion: row.newDocumentState.descripcion, frase: row.newDocumentState.frase,
+                            creatura: row.newDocumentState.creatura, detalles: row.newDocumentState.detalles,
+                            imagen: row.newDocumentState.imagen,
+                            updated_at: row.newDocumentState.updatedAt, is_deleted: row.newDocumentState._deleted
+                        });
+                    }
+                    return [];
+                }
+            },
+            pull: {
+                handler: async (lastCheckpoint, batchSize) => {
+                    const checkpoint = lastCheckpoint as { id: string; updatedAt: number } | null;
+                    const lastTime = checkpoint ? checkpoint.updatedAt : 0;
+                    const { data } = await this.supabase.from('valores')
+                        .select('*').gt('updated_at', lastTime)
+                        .order('updated_at', { ascending: true }).limit(batchSize);
+                    const docs: Valores[] = (data || []).map(r => ({
+                        id: r.id, nombre: r.nombre, descripcion: r.descripcion, frase: r.frase,
+                        creatura: r.creatura, detalles: r.detalles, imagen: r.imagen,
+                        updatedAt: Number(r.updated_at), _deleted: r.is_deleted,
+                    } as Valores));
+                    return {
+                        documents: docs,
+                        checkpoint: docs.length > 0 ? { id: docs[docs.length - 1].id, updatedAt: docs[docs.length - 1].updatedAt } : checkpoint
+                    };
+                }
+            }
+        });
+        replica.error$.subscribe(err => console.error('❌ Error en replicación de Valores:', err));
+        this.replicas.valores = replica;
+        return replica;
+    }
+
+    private sincronizarMiedos(coleccion: RxCollection<Miedos>): RxReplicationState<Miedos, any> {
+        const replica = replicateRxCollection<Miedos, any>({
+            collection: coleccion,
+            replicationIdentifier: 'sync-miedos-' + this.version,
+            live: false, autoStart: false, retryTime: 4000,
+            push: {
+                handler: async (rows) => {
+                    for (const row of rows) {
+                        await this.supabase.from('miedos').upsert({
+                            id: row.newDocumentState.id, nombre: row.newDocumentState.nombre,
+                            descripcion: row.newDocumentState.descripcion, frase: row.newDocumentState.frase,
+                            creatura: row.newDocumentState.creatura, detalles: row.newDocumentState.detalles,
+                            imagen: row.newDocumentState.imagen,
+                            updated_at: row.newDocumentState.updatedAt, is_deleted: row.newDocumentState._deleted
+                        });
+                    }
+                    return [];
+                }
+            },
+            pull: {
+                handler: async (lastCheckpoint, batchSize) => {
+                    const checkpoint = lastCheckpoint as { id: string; updatedAt: number } | null;
+                    const lastTime = checkpoint ? checkpoint.updatedAt : 0;
+                    const { data } = await this.supabase.from('miedos')
+                        .select('*').gt('updated_at', lastTime)
+                        .order('updated_at', { ascending: true }).limit(batchSize);
+                    const docs: Miedos[] = (data || []).map(r => ({
+                        id: r.id, nombre: r.nombre, descripcion: r.descripcion, frase: r.frase,
+                        creatura: r.creatura, detalles: r.detalles, imagen: r.imagen,
+                        updatedAt: Number(r.updated_at), _deleted: r.is_deleted,
+                    } as Miedos));
+                    return {
+                        documents: docs,
+                        checkpoint: docs.length > 0 ? { id: docs[docs.length - 1].id, updatedAt: docs[docs.length - 1].updatedAt } : checkpoint
+                    };
+                }
+            }
+        });
+        replica.error$.subscribe(err => console.error('❌ Error en replicación de Miedos:', err));
+        this.replicas.miedos = replica;
+        return replica;
+    }
+
+    private sincronizarEmociones(coleccion: RxCollection<Emociones>): RxReplicationState<Emociones, any> {
+        const replica = replicateRxCollection<Emociones, any>({
+            collection: coleccion,
+            replicationIdentifier: 'sync-emociones-' + this.version,
+            live: false, autoStart: false, retryTime: 4000,
+            push: {
+                handler: async (rows) => {
+                    for (const row of rows) {
+                        await this.supabase.from('emociones').upsert({
+                            id: row.newDocumentState.id, nombre: row.newDocumentState.nombre,
+                            descripcion: row.newDocumentState.descripcion, frase: row.newDocumentState.frase,
+                            creatura: row.newDocumentState.creatura, detalles: row.newDocumentState.detalles,
+                            imagen: row.newDocumentState.imagen,
+                            updated_at: row.newDocumentState.updatedAt, is_deleted: row.newDocumentState._deleted
+                        });
+                    }
+                    return [];
+                }
+            },
+            pull: {
+                handler: async (lastCheckpoint, batchSize) => {
+                    const checkpoint = lastCheckpoint as { id: string; updatedAt: number } | null;
+                    const lastTime = checkpoint ? checkpoint.updatedAt : 0;
+                    const { data } = await this.supabase.from('emociones')
+                        .select('*').gt('updated_at', lastTime)
+                        .order('updated_at', { ascending: true }).limit(batchSize);
+                    const docs: Emociones[] = (data || []).map(r => ({
+                        id: r.id, nombre: r.nombre, descripcion: r.descripcion, frase: r.frase,
+                        creatura: r.creatura, detalles: r.detalles, imagen: r.imagen,
+                        updatedAt: Number(r.updated_at), _deleted: r.is_deleted,
+                    } as Emociones));
+                    return {
+                        documents: docs,
+                        checkpoint: docs.length > 0 ? { id: docs[docs.length - 1].id, updatedAt: docs[docs.length - 1].updatedAt } : checkpoint
+                    };
+                }
+            }
+        });
+        replica.error$.subscribe(err => console.error('❌ Error en replicación de Emociones:', err));
+        this.replicas.emociones = replica;
+        return replica;
+    }
+
+    private sincronizarMemoria(coleccion: RxCollection<Memoria>): RxReplicationState<Memoria, any> {
+        const replica = replicateRxCollection<Memoria, any>({
+            collection: coleccion,
+            replicationIdentifier: 'sync-memoria-' + this.version,
+            live: false, autoStart: false, retryTime: 4000,
+            push: {
+                handler: async (rows) => {
+                    for (const row of rows) {
+                        const s = row.newDocumentState;
+                        await this.supabase.from('memoria').upsert({
+                            id: s.id,
+                            uno_palabra: s.unoPalabra, uno_descripcion: s.unoDescripcion,
+                            dos_palabra: s.dosPalabra, dos_descripcion: s.dosDescripcion,
+                            tres_palabra: s.tresPalabra, tres_descripcion: s.tresDescripcion,
+                            cuatro_palabra: s.cuatroPalabra, cuatro_descripcion: s.cuatroDescripcion,
+                            cinco_palabra: s.cincoPalabra, cinco_descripcion: s.cincoDescripcion,
+                            seis_palabra: s.seisPalabra, seis_descripcion: s.seisDescripcion,
+                            siete_palabra: s.sietePalabra, siete_descripcion: s.sieteDescripcion,
+                            ocho_palabra: s.ochoPalabra, ocho_descripcion: s.ochoDescripcion,
+                            nueve_palabra: s.nuevePalabra, nueve_descripcion: s.nueveDescripcion,
+                            diez_palabra: s.diezPalabra, diez_descripcion: s.diezDescripcion,
+                            once_palabra: s.oncePalabra, once_descripcion: s.onceDescripcion,
+                            doce_palabra: s.docePalabra, doce_descripcion: s.doceDescripcion,
+                            trece_palabra: s.trecePalabra, trece_descripcion: s.treceDescripcion,
+                            catorce_palabra: s.catorcePalabra, catorce_descripcion: s.catorceDescripcion,
+                            quince_palabra: s.quincePalabra, quince_descripcion: s.quinceDescripcion,
+                            dieciseis_palabra: s.dieciseisPalabra, dieciseis_descripcion: s.dieciseisDescripcion,
+                            diecisiete_palabra: s.diecisietePalabra, diecisiete_descripcion: s.diecisieteDescripcion,
+                            dieciocho_palabra: s.dieciochoPalabra, dieciocho_descripcion: s.dieciochoDescripcion,
+                            diecinueve_palabra: s.diecinuevePalabra, diecinueve_descripcion: s.diecinueveDescripcion,
+                            veinte_palabra: s.veintePalabra, veinte_descripcion: s.veinteDescripcion,
+                            updated_at: s.updatedAt, is_deleted: s._deleted
+                        });
+                    }
+                    return [];
+                }
+            },
+            pull: {
+                handler: async (lastCheckpoint, batchSize) => {
+                    const checkpoint = lastCheckpoint as { id: string; updatedAt: number } | null;
+                    const lastTime = checkpoint ? checkpoint.updatedAt : 0;
+                    const { data } = await this.supabase.from('memoria')
+                        .select('*').gt('updated_at', lastTime)
+                        .order('updated_at', { ascending: true }).limit(batchSize);
+                    const docs: Memoria[] = (data || []).map(r => ({
+                        id: r.id,
+                        unoPalabra: r.uno_palabra, unoDescripcion: r.uno_descripcion,
+                        dosPalabra: r.dos_palabra, dosDescripcion: r.dos_descripcion,
+                        tresPalabra: r.tres_palabra, tresDescripcion: r.tres_descripcion,
+                        cuatroPalabra: r.cuatro_palabra, cuatroDescripcion: r.cuatro_descripcion,
+                        cincoPalabra: r.cinco_palabra, cincoDescripcion: r.cinco_descripcion,
+                        seisPalabra: r.seis_palabra, seisDescripcion: r.seis_descripcion,
+                        sietePalabra: r.siete_palabra, sieteDescripcion: r.siete_descripcion,
+                        ochoPalabra: r.ocho_palabra, ochoDescripcion: r.ocho_descripcion,
+                        nuevePalabra: r.nueve_palabra, nueveDescripcion: r.nueve_descripcion,
+                        diezPalabra: r.diez_palabra, diezDescripcion: r.diez_descripcion,
+                        oncePalabra: r.once_palabra, onceDescripcion: r.once_descripcion,
+                        docePalabra: r.doce_palabra, doceDescripcion: r.doce_descripcion,
+                        trecePalabra: r.trece_palabra, treceDescripcion: r.trece_descripcion,
+                        catorcePalabra: r.catorce_palabra, catorceDescripcion: r.catorce_descripcion,
+                        quincePalabra: r.quince_palabra, quinceDescripcion: r.quince_descripcion,
+                        dieciseisPalabra: r.dieciseis_palabra, dieciseisDescripcion: r.dieciseis_descripcion,
+                        diecisietePalabra: r.diecisiete_palabra, diecisieteDescripcion: r.diecisiete_descripcion,
+                        dieciochoPalabra: r.dieciocho_palabra, dieciochoDescripcion: r.dieciocho_descripcion,
+                        diecinuevePalabra: r.diecinueve_palabra, diecinueveDescripcion: r.diecinueve_descripcion,
+                        veintePalabra: r.veinte_palabra, veinteDescripcion: r.veinte_descripcion,
+                        updatedAt: Number(r.updated_at), _deleted: r.is_deleted,
+                    } as Memoria));
+                    return {
+                        documents: docs,
+                        checkpoint: docs.length > 0 ? { id: docs[docs.length - 1].id, updatedAt: docs[docs.length - 1].updatedAt } : checkpoint
+                    };
+                }
+            }
+        });
+        replica.error$.subscribe(err => console.error('❌ Error en replicación de Memoria:', err));
+        this.replicas.memoria = replica;
+        return replica;
+    }
+
     async eliminarTodoContenidoIndice() {
         try {
             // 1. Obtenemos todos los documentos actuales guardados en la colección de índices
@@ -1671,6 +2122,51 @@ export class RxdbService {
             console.log(`Contenido de índice con ID ${id} eliminado correctamente.`);
         } catch (error) {
             console.error(`Error al eliminar el contenido de índice con ID ${id}:`, error);
+        }
+    }
+
+    async eliminarPersonalidadPorId(id: string) {
+        try {
+            await this.db['personalidad'].findOne(id)?.remove();
+            console.log(`Personalidad con ID ${id} eliminada correctamente.`);
+        } catch (error) {
+            console.error(`Error al eliminar la personalidad con ID ${id}:`, error);
+        }
+    }
+
+    async eliminarValoresPorId(id: string) {
+        try {
+            await this.db['valores'].findOne(id)?.remove();
+            console.log(`Valores con ID ${id} eliminados correctamente.`);
+        } catch (error) {
+            console.error(`Error al eliminar los valores con ID ${id}:`, error);
+        }
+    }
+
+    async eliminarMiedosPorId(id: string) {
+        try {
+            await this.db['miedos'].findOne(id)?.remove();
+            console.log(`Miedos con ID ${id} eliminados correctamente.`);
+        } catch (error) {
+            console.error(`Error al eliminar los miedos con ID ${id}:`, error);
+        }
+    }
+
+    async eliminarEmocionesPorId(id: string) {
+        try {
+            await this.db['emociones'].findOne(id)?.remove();
+            console.log(`Emociones con ID ${id} eliminadas correctamente.`);
+        } catch (error) {
+            console.error(`Error al eliminar las emociones con ID ${id}:`, error);
+        }
+    }
+
+    async eliminarMemoriaPorId(id: string) {
+        try {
+            await this.db['memoria'].findOne(id)?.remove();
+            console.log(`Memoria con ID ${id} eliminada correctamente.`);
+        } catch (error) {
+            console.error(`Error al eliminar la memoria con ID ${id}:`, error);
         }
     }
 }

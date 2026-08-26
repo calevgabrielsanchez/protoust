@@ -8,6 +8,11 @@ import { Saga } from '../models/saga.model';
 import { Tomo } from '../models/tomo.model';
 import { Indice } from '../models/indice.model';
 import { ContenidoIndice } from '../models/contenidoIndice.model';
+import { Personalidad } from '../models/personalidad.model';
+import { Valores } from '../models/valores.model';
+import { Miedos } from '../models/miedos.model';
+import { Emociones } from '../models/emociones.modelo';
+import { Memoria } from '../models/memoria.modelo';
 
 // --- ESQUEMAS JSON PARA RXDB ---
 export const UNIVERSO_SCHEMA: RxJsonSchema<Universo> = {
@@ -228,4 +233,145 @@ export const CONTENIDO_INDICE_SCHEMA: RxJsonSchema<ContenidoIndice> = {
         _deleted: { type: 'boolean' }
     },
     required: ['id' ,'indiceId', 'updatedAt']
+};
+
+export const PERSONALIDAD_SCHEMA: RxJsonSchema<Personalidad> = {
+    title: 'personalidad schema',
+    version: 0,
+    primaryKey: 'id',
+    type: 'object',
+    properties: {
+        id: { type: 'string', maxLength: 50 },
+        detalles: { type: 'string' },
+        imagen: { type: 'string' },
+        mbti: { type: 'string' },
+        colorForma: { type: 'string' },
+        oficio: { type: 'string' },
+        descripcion: { type: 'string' },
+        comoSon: { type: 'string' },
+        cualidad: { type: 'string' },
+        dondeEncaja: { type: 'string' },
+        habilidad: { type: 'string' },
+        valores: { type: 'string' },
+        pareja: { type: 'string' },
+        traumas: { type: 'string' },
+        enfermedad: { type: 'string' },
+        danan: { type: 'string' },
+        CaleVRije: { type: 'string' },
+        funcion: { type: 'string' },
+        grupo: { type: 'string' },
+        updatedAt: { type: 'integer' },
+        _deleted: { type: 'boolean' }
+    },
+    required: ['id', 'updatedAt']
+};
+
+export const VALORES_SCHEMA: RxJsonSchema<Valores> = {
+    title: 'valores schema',
+    version: 0,
+    primaryKey: 'id',
+    type: 'object',
+    properties: {
+        id: { type: 'string', maxLength: 50 },
+        nombre: { type: 'string' },
+        descripcion: { type: 'string' },
+        frase: { type: 'string' },
+        creatura: { type: 'string' },
+        detalles: { type: 'string' },
+        imagen: { type: 'string' },
+        updatedAt: { type: 'integer' },
+        _deleted: { type: 'boolean' }
+    },
+    required: ['id', 'updatedAt']
+};
+
+export const MIEDOS_SCHEMA: RxJsonSchema<Miedos> = {
+    title: 'miedos schema',
+    version: 0,
+    primaryKey: 'id',
+    type: 'object',
+    properties: {
+        id: { type: 'string', maxLength: 50 },
+        nombre: { type: 'string' },
+        descripcion: { type: 'string' },
+        frase: { type: 'string' },
+        creatura: { type: 'string' },
+        detalles: { type: 'string' },
+        imagen: { type: 'string' },
+        updatedAt: { type: 'integer' },
+        _deleted: { type: 'boolean' }
+    },
+    required: ['id', 'updatedAt']
+};
+
+export const EMOCIONES_SCHEMA: RxJsonSchema<Emociones> = {
+    title: 'emociones schema',
+    version: 0,
+    primaryKey: 'id',
+    type: 'object',
+    properties: {
+        id: { type: 'string', maxLength: 50 },
+        nombre: { type: 'string' },
+        descripcion: { type: 'string' },
+        frase: { type: 'string' },
+        creatura: { type: 'string' },
+        detalles: { type: 'string' },
+        imagen: { type: 'string' },
+        updatedAt: { type: 'integer' },
+        _deleted: { type: 'boolean' }
+    },
+    required: ['id', 'updatedAt']
+};
+
+export const MEMORIA_SCHEMA: RxJsonSchema<Memoria> = {
+    title: 'memoria schema',
+    version: 0,
+    primaryKey: 'id',
+    type: 'object',
+    properties: {
+        id: { type: 'string', maxLength: 50 },
+        unoPalabra: { type: 'string' },
+        unoDescripcion: { type: 'string' },
+        dosPalabra: { type: 'string' },
+        dosDescripcion: { type: 'string' },
+        tresPalabra: { type: 'string' },
+        tresDescripcion: { type: 'string' },
+        cuatroPalabra: { type: 'string' },
+        cuatroDescripcion: { type: 'string' },
+        cincoPalabra: { type: 'string' },
+        cincoDescripcion: { type: 'string' },
+        seisPalabra: { type: 'string' },
+        seisDescripcion: { type: 'string' },
+        sietePalabra: { type: 'string' },
+        sieteDescripcion: { type: 'string' },
+        ochoPalabra: { type: 'string' },
+        ochoDescripcion: { type: 'string' },
+        nuevePalabra: { type: 'string' },
+        nueveDescripcion: { type: 'string' },
+        diezPalabra: { type: 'string' },
+        diezDescripcion: { type: 'string' },
+        oncePalabra: { type: 'string' },
+        onceDescripcion: { type: 'string' },
+        docePalabra: { type: 'string' },
+        doceDescripcion: { type: 'string' },
+        trecePalabra: { type: 'string' },
+        treceDescripcion: { type: 'string' },
+        catorcePalabra: { type: 'string' },
+        catorceDescripcion: { type: 'string' },
+        quincePalabra: { type: 'string' },
+        quinceDescripcion: { type: 'string' },
+        dieciseisPalabra: { type: 'string' },
+        dieciseisDescripcion: { type: 'string' },
+        diecisietePalabra: { type: 'string' },
+        diecisieteDescripcion: { type: 'string' },
+        dieciochoPalabra: { type: 'string' },
+        dieciochoDescripcion: { type: 'string' },
+        diecinuevePalabra: { type: 'string' },
+        diecinueveDescripcion: { type: 'string' },
+        veintePalabra: { type: 'string' },
+        veinteDescripcion: { type: 'string' },
+        updatedAt: { type: 'integer' },
+        _deleted: { type: 'boolean' }
+    },
+    required: ['id', 'updatedAt']
 };

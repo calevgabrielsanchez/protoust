@@ -93,6 +93,8 @@ export class MenteComponent {
     creatura: '',
     detalles: '',
     imagen: '',
+    updatedAt: 0,
+    _deleted: false
   };
 
   valoresSeleccionado: Valores = this.valoresVacio;
@@ -106,6 +108,8 @@ export class MenteComponent {
     creatura: '',
     detalles: '',
     imagen: '',
+    updatedAt: 0,
+    _deleted: false
   };
 
   miedosSeleccionado: Miedos = this.miedosVacio;
@@ -119,6 +123,8 @@ export class MenteComponent {
     creatura: '',
     detalles: '',
     imagen: '',
+    updatedAt: 0,
+    _deleted: false
   };
 
   emocionesSeleccionada: Emociones = this.emocionesVacia;

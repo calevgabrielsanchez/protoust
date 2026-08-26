@@ -18,6 +18,11 @@ import { Indice } from '../../models/indice.model';
 import { TextPlusComponent } from '../text-plus.component/text-plus.component';
 import { ClickTextarea } from '../../directives/click-textarea';
 import { ContenidoIndice } from '../../models/contenidoIndice.model';
+import { Personalidad } from '../../models/personalidad.model';
+import { Valores } from '../../models/valores.model';
+import { Miedos } from '../../models/miedos.model';
+import { Emociones } from '../../models/emociones.modelo';
+import { Memoria } from '../../models/memoria.modelo';
 
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
@@ -249,6 +254,12 @@ faPersonDressBurst=faPersonDressBurst;
     _deleted: false
   };
 
+  todosPersonalidad = signal<Personalidad[]>([]);
+  todosValores = signal<Valores[]>([]);
+  todosMiedos = signal<Miedos[]>([]);
+  todosEmociones = signal<Emociones[]>([]);
+  todosMemoria = signal<Memoria[]>([]);
+
   /*****************************************
    * Constructor y funciones de iniciacion
    * ***************************************
@@ -274,7 +285,7 @@ faPersonDressBurst=faPersonDressBurst;
       return;
     }
 
-    const locales = await this.csvService.loadAllTables<object>(['universo', 'mundo', 'cultura', 'personaje', 'creatura', 'saga', 'tomo', 'indice', 'contenidoIndice']);
+    const locales = await this.csvService.loadAllTables<object>(['universo', 'mundo', 'cultura', 'personaje', 'creatura', 'saga', 'tomo', 'indice', 'contenidoIndice', 'personalidad', 'valores', 'miedos', 'emociones', 'memoria']);
 
     const universos = this.fusionar(locales['universo'] as Universo[] ?? [], tablas['universo'] as Universo[] ?? []);
     const mundos = this.fusionar(locales['mundo'] as Mundo[] ?? [], tablas['mundo'] as Mundo[] ?? []);
@@ -285,6 +296,11 @@ faPersonDressBurst=faPersonDressBurst;
     const tomos = this.fusionar(locales['tomo'] as Tomo[] ?? [], tablas['tomo'] as Tomo[] ?? []);
     const indices = this.fusionar(locales['indice'] as Indice[] ?? [], tablas['indice'] as Indice[] ?? []);
     const contenidos = this.fusionar(locales['contenidoIndice'] as ContenidoIndice[] ?? [], tablas['contenidoIndice'] as ContenidoIndice[] ?? []);
+    const personalidades = this.fusionar(locales['personalidad'] as Personalidad[] ?? [], tablas['personalidad'] as Personalidad[] ?? []);
+    const valoresList = this.fusionar(locales['valores'] as Valores[] ?? [], tablas['valores'] as Valores[] ?? []);
+    const miedosList = this.fusionar(locales['miedos'] as Miedos[] ?? [], tablas['miedos'] as Miedos[] ?? []);
+    const emocionesList = this.fusionar(locales['emociones'] as Emociones[] ?? [], tablas['emociones'] as Emociones[] ?? []);
+    const memorias = this.fusionar(locales['memoria'] as Memoria[] ?? [], tablas['memoria'] as Memoria[] ?? []);
 
     await this.csvService.saveAllTables<object>({
       universo: universos,
@@ -295,7 +311,12 @@ faPersonDressBurst=faPersonDressBurst;
       saga: sagas,
       tomo: tomos,
       indice: indices,
-      contenidoIndice: contenidos
+      contenidoIndice: contenidos,
+      personalidad: personalidades,
+      valores: valoresList,
+      miedos: miedosList,
+      emociones: emocionesList,
+      memoria: memorias
     });
 
     this.todosUniverso.set(this.unicos(universos));
@@ -307,12 +328,17 @@ faPersonDressBurst=faPersonDressBurst;
     this.todosTomo.set(this.unicos(tomos));
     this.todosIndice.set(this.unicos(indices));
     this.todosContenidoIndice.set(this.unicos(contenidos));
+    this.todosPersonalidad.set(this.unicos(personalidades));
+    this.todosValores.set(this.unicos(valoresList));
+    this.todosMiedos.set(this.unicos(miedosList));
+    this.todosEmociones.set(this.unicos(emocionesList));
+    this.todosMemoria.set(this.unicos(memorias));
 
     alert('Datos descargados: solo se agregaron los registros de la nube que faltaban en tus archivos locales.');
   }
 
   async cargarTablasCSV() {
-    const tablas = await this.csvService.loadAllTables<object>(['universo', 'mundo', 'cultura', 'personaje', 'creatura', 'saga', 'tomo', 'indice', 'contenidoIndice']);
+    const tablas = await this.csvService.loadAllTables<object>(['universo', 'mundo', 'cultura', 'personaje', 'creatura', 'saga', 'tomo', 'indice', 'contenidoIndice', 'personalidad', 'valores', 'miedos', 'emociones', 'memoria']);
 
     this.todosUniverso.set(this.unicos(tablas['universo'] as Universo[] ?? []));
     this.todosMundo.set(this.unicos(tablas['mundo'] as Mundo[] ?? []));
@@ -323,6 +349,11 @@ faPersonDressBurst=faPersonDressBurst;
     this.todosTomo.set(this.unicos(tablas['tomo'] as Tomo[] ?? []));
     this.todosIndice.set(this.unicos(tablas['indice'] as Indice[] ?? []));
     this.todosContenidoIndice.set(this.unicos(tablas['contenidoIndice'] as ContenidoIndice[] ?? []));
+    this.todosPersonalidad.set(this.unicos(tablas['personalidad'] as Personalidad[] ?? []));
+    this.todosValores.set(this.unicos(tablas['valores'] as Valores[] ?? []));
+    this.todosMiedos.set(this.unicos(tablas['miedos'] as Miedos[] ?? []));
+    this.todosEmociones.set(this.unicos(tablas['emociones'] as Emociones[] ?? []));
+    this.todosMemoria.set(this.unicos(tablas['memoria'] as Memoria[] ?? []));
   }
 
   private unicos<T extends { id?: string }>(items: T[]): T[] {
@@ -358,6 +389,11 @@ faPersonDressBurst=faPersonDressBurst;
       tomo: this.todosTomo(),
       indice: this.todosIndice(),
       contenidoIndice: this.todosContenidoIndice(),
+      personalidad: this.todosPersonalidad(),
+      valores: this.todosValores(),
+      miedos: this.todosMiedos(),
+      emociones: this.todosEmociones(),
+      memoria: this.todosMemoria(),
     };
   }
 
