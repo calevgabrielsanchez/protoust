@@ -1,4 +1,5 @@
 import { Component, inject, Signal, signal } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import {
   faSave, faFileHalfDashed, faGlobe, faBook, faEarthAmericas, faScroll, faImage,
   faCircleInfo, faSquarePlus, faBaby, faDragon, faMeteor, faSkullCrossbones, faTrashCan,
@@ -14,12 +15,16 @@ import { FormBuilder, FormGroup, FormArray, FormControl, ReactiveFormsModule } f
 import { CommonModule } from '@angular/common';
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { Memoria } from '../../models/memoria.modelo';
+import { LocalCsvService } from '../../services/local-csv.service';
 
 import {
   AfterViewInit,
   ElementRef,
   ViewChild
 } from '@angular/core';
+import { Dibujo } from '../../models/dibujo.model';
+import { Creatividad } from '../../models/creatividad.modelo';
 
 
 @Component({
@@ -37,6 +42,11 @@ export class CreatividadComponent {
   descripcionArquetipoSeleccionado: string = "";
 
   http = inject(HttpClient);
+  localCsv = inject(LocalCsvService);
+  cdr = inject(ChangeDetectorRef);
+  memoria = {} as Memoria;
+  dibujoModel = {} as Dibujo;
+  creatividadModel = {} as Creatividad;
 
   faSave = faSave;
   faFileHalfDashed = faFileHalfDashed;
@@ -67,7 +77,7 @@ export class CreatividadComponent {
   faTextHeight = faTextHeight;
   faFolderOpen = faFolderOpen;
 
-  mostrarTextPlus: boolean = false;
+  mostrarTextPlus = signal(false);
   textoAEditar: string = "";
 
   palabras = signal<any[]>([]);
@@ -82,6 +92,12 @@ export class CreatividadComponent {
 
   resultadoTienda: number = 0;
   operacionResultado: string = '';
+  controlTextPlus: string = "";
+
+  creatividad: boolean = true;
+  memoriaB: boolean = false;
+  matematicas: boolean = false;
+  dibujo: boolean = false;
   //=========================================================
   //                FUNCIONES
   //=========================================================
@@ -131,24 +147,39 @@ export class CreatividadComponent {
   }
 
   closeTextPlus(resolvedValue: string) {
-    this.mostrarTextPlus = false;
+    this.mostrarTextPlus.set(false);
     /* if (this.textPlusPromiseResolver) {
        this.textPlusPromiseResolver(resolvedValue);
        this.textPlusPromiseResolver = null;
      }*/
   }
 
+  
   aceptar() {
-
-    this.historia[this.inputId - 1] = this.textoAEditar;
-    console.log(this.textoAEditar)
-    this.mostrarTextPlus = false;
+    switch (this.controlTextPlus) {
+      case 'memoria':
+        this.historia[this.inputId - 1] = this.textoAEditar;
+        console.log(this.textoAEditar)
+        this.mostrarTextPlus.set(false);
+        break;
+      case 'dibujo':
+        this.dibujoModel.historia = this.textoAEditar;
+        console.log(this.textoAEditar)
+        this.mostrarTextPlus.set(false);
+        break;
+       case 'creatividad':
+        this.creatividadModel.desarrollo = this.textoAEditar;
+        console.log(this.textoAEditar)
+        this.mostrarTextPlus.set(false);
+        break; 
+    }
 
   }
 
   abrirEditarText() {
     // this.textoAEditar = this.textareaSeleccionada()?.value || '';
-    this.mostrarTextPlus = true;
+    this.mostrarTextPlus.set(true);
+    this.cdr.detectChanges();
   }
 
   onClickCaleVRije() {
@@ -360,13 +391,9 @@ export class CreatividadComponent {
     selectElement.value = arquetipoAleatorio.id.toString();
   }
 
-  creatividad: boolean = false;
-  memoria: boolean = false;
-  matematicas: boolean = true;
-  dibujo: boolean = false;
   selectJuego(juego: string) {
     this.creatividad = false;
-    this.memoria = false;
+    this.memoriaB = false;
     this.matematicas = false;
     this.dibujo = false;
     switch (juego) {
@@ -374,7 +401,7 @@ export class CreatividadComponent {
         this.creatividad = true;
         break;
       case 'memoria':
-        this.memoria = true;
+        this.memoriaB = true;
         break;
       case 'matematicas':
         this.matematicas = true;
@@ -386,7 +413,8 @@ export class CreatividadComponent {
   }
 
   onEscribirEjercicioCreatividad() {
-    this.mostrarTextPlus = true;
+    this.controlTextPlus='creatividad';
+    this.mostrarTextPlus.set(true);
     let ejercicioTextInput = document.getElementById("ejercicio") as HTMLSelectElement;
     let titulo = ejercicioTextInput.options[ejercicioTextInput.selectedIndex].text;
     let arquetipoTextInput = document.getElementById("arquetipo") as HTMLSelectElement;
@@ -396,6 +424,61 @@ export class CreatividadComponent {
       "#" + arquetipo + "\n" + this.descripcionArquetipoSeleccionado + "\n" +
       "#Palabras" + "\n" + palabras + "\n ----------------------Empieza----------------------";
     console.log(this.textoAEditar);
+  }
+
+  onGuardarCreatividad() {
+    const nombre = prompt('Ponle un nombre a esta creación:')?.trim();
+
+    if (!nombre) {
+      console.error('❌ Se canceló el guardado: no se proporcionó un nombre.');
+      return;
+    }
+
+    this.creatividadModel = {
+      id: nombre + '_' + this.generarAleatorioId(),
+      nombre,
+      desarrollo: this.textoAEditar,
+      updatedAt: Date.now(),
+      _deleted: false
+    };
+
+    this.localCsv.loadTable<Creatividad>('creatividad').then(existentes => {
+      const filas = [...existentes.filter(c => c.id !== this.creatividadModel.id), this.creatividadModel];
+      return this.localCsv.saveTable('creatividad', filas).then(() => {
+        console.log('📦 Creatividad guardada en local:', this.creatividadModel);
+        alert('✅ Creatividad guardada correctamente.');
+      });
+    }).catch(err => {
+      console.error('❌ Error al guardar la creatividad:', err);
+    });
+  }
+
+  async onAbrirCreatividad() {
+    const creaciones = await this.localCsv.loadTable<Creatividad>('creatividad');
+
+    if (creaciones.length === 0) {
+      alert('No hay creaciones guardadas.');
+      return;
+    }
+
+    const lista = creaciones.map((creacion, i) => `${i + 1}.- ${creacion.nombre}`).join('\n');
+    const indice = prompt('¿Qué creación quieres abrir?\n\n' + lista + '\n\nEscribe el número:')?.trim();
+
+    if (!indice) {
+      return;
+    }
+
+    const numero = parseInt(indice, 10);
+    if (isNaN(numero) || numero < 1 || numero > creaciones.length) {
+      alert('Índice inválido.');
+      return;
+    }
+
+    const seleccionada = creaciones[numero - 1];
+    this.textoAEditar = seleccionada.desarrollo;
+    this.abrirEditarText();
+
+    console.log('📖 Creatividad abierta:', seleccionada);
   }
 
   //=============================================================
@@ -473,7 +556,8 @@ export class CreatividadComponent {
     } else {
       this.textoAEditar = (inputText as HTMLInputElement).value
     }
-    this.mostrarTextPlus = true;
+    this.controlTextPlus='memoria';
+    this.mostrarTextPlus.set(true);
   }
 
   escribirTodaHistoria() {
@@ -482,7 +566,82 @@ export class CreatividadComponent {
       texto = texto + '>----------------' + (i + 1) + '----------------<\n';
       texto = texto + this.historia[i] + "\n";
     }
-    console.log(texto);
+    this.controlTextPlus='memoria';
+    this.textoAEditar = texto;
+    this.mostrarTextPlus.set(true);
+  }
+
+  guardarMemoria() {
+    const nombre = prompt('Ponle un nombre a esta memoria:')?.trim();
+
+    if (!nombre) {
+      console.error('❌ Se canceló el guardado: no se proporcionó un nombre.');
+      return;
+    }
+
+    const aleatorio = this.generarAleatorioId();
+    this.memoria.id = nombre + '_' + aleatorio;
+
+    const palabras = ['uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez',
+      'once', 'doce', 'trece', 'catorce', 'quince', 'dieciseis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte'];
+
+    palabras.forEach((nombreCampo, indice) => {
+      const inputText = document.getElementById('text' + (indice + 1)) as HTMLInputElement;
+      const palabra = inputText?.value ?? '';
+      const descripcion = this.historia[indice] ?? '';
+
+      (this.memoria as any)[nombreCampo + 'Palabra'] = palabra;
+      (this.memoria as any)[nombreCampo + 'Descripcion'] = descripcion;
+    });
+
+    this.memoria.updatedAt = Date.now();
+    this.memoria._deleted = false;
+
+    this.localCsv.loadTable<Memoria>('memoria').then(existentes => {
+      const filas = [...existentes, this.memoria as unknown as Memoria];
+      return this.localCsv.saveTable('memoria', filas).then(() => {
+        console.log('📦 Memoria guardada en local:', this.memoria);
+        alert('✅ Memoria guardada correctamente.');
+      });
+    }).catch(err => {
+      console.error('❌ Error al guardar la memoria:', err);
+    });
+  }
+
+  async abrirMemoria() {
+    const memorias = await this.localCsv.loadTable<Memoria>('memoria');
+
+    if (memorias.length === 0) {
+      alert('No hay memorias guardadas.');
+      return;
+    }
+
+    const lista = memorias.map((memoria, i) => `${i + 1}.- ${memoria.id}`).join('\n');
+    const indice = prompt('¿Qué memoria quieres abrir?\n\n' + lista + '\n\nEscribe el número:')?.trim();
+
+    if (!indice) {
+      return;
+    }
+
+    const numero = parseInt(indice, 10);
+    if (isNaN(numero) || numero < 1 || numero > memorias.length) {
+      alert('Índice inválido.');
+      return;
+    }
+
+    const memoria = memorias[numero - 1];
+    const palabras = ['uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez',
+      'once', 'doce', 'trece', 'catorce', 'quince', 'dieciseis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte'];
+
+    palabras.forEach((nombreCampo, i) => {
+      const inputText = document.getElementById('text' + (i + 1)) as HTMLInputElement;
+      if (inputText) {
+        inputText.value = (memoria as any)[nombreCampo + 'Palabra'] ?? '';
+      }
+      this.historia[i] = (memoria as any)[nombreCampo + 'Descripcion'] ?? '';
+    });
+
+    console.log('📖 Memoria abierta:', memoria);
   }
   //---------------------------------------------------dibujo ------------------------------
 
@@ -1080,6 +1239,86 @@ export class CreatividadComponent {
   }
 
   // ============================================================
+  // GUARDAR / ABRIR DIBUJO
+  // ============================================================
+
+  guardarDibujo() {
+    const canvas = this.getCanvasElement();
+    if (!canvas) {
+      console.error('No se encontró el canvas para guardar.');
+      return;
+    }
+    const nombre = prompt('Ponle un nombre a este dibujo:')?.trim();
+
+    if (!nombre) {
+      console.error('❌ Se canceló el guardado: no se proporcionó un nombre.');
+      return;
+    }
+
+    const aleatorio = this.generarAleatorioId();
+
+    this.dibujoModel.id = nombre + '_' + aleatorio;
+    this.dibujoModel.dibujo = canvas.toDataURL('image/png');
+    this.dibujoModel.updatedAt = Date.now();
+    this.dibujoModel._deleted = false;
+
+    this.localCsv.loadTable<Dibujo>('dibujo').then(existentes => {
+      const filas = [...existentes.filter(d => d.id !== this.dibujoModel.id), this.dibujoModel];
+      return this.localCsv.saveTable('dibujo', filas).then(() => {
+        console.log('📦 Dibujo guardado en local:', this.dibujoModel);
+        alert('✅ Dibujo guardado correctamente.');
+      });
+    }).catch(err => {
+      console.error('❌ Error al guardar el dibujo:', err);
+    });
+  }
+
+  async abrirDibujo() {
+    const dibujos = await this.localCsv.loadTable<Dibujo>('dibujo');
+
+    if (dibujos.length === 0) {
+      alert('No hay dibujos guardados.');
+      return;
+    }
+
+    const lista = dibujos.map((dibujo, i) => `${i + 1}.- ${dibujo.id}`).join('\n');
+    const indice = prompt('¿Qué dibujo quieres abrir?\n\n' + lista + '\n\nEscribe el número:')?.trim();
+
+    if (!indice) {
+      return;
+    }
+
+    const numero = parseInt(indice, 10);
+    if (isNaN(numero) || numero < 1 || numero > dibujos.length) {
+      alert('Índice inválido.');
+      return;
+    }
+
+    const seleccionado = dibujos[numero - 1];
+    this.dibujoModel = { ...seleccionado };
+
+    const canvas = this.getCanvasElement();
+    if (!canvas) {
+      return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+
+    const imagen = new Image();
+    imagen.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(imagen, 0, 0, canvas.width, canvas.height);
+      this.configureCanvas(ctx);
+    };
+    imagen.src = seleccionado.dibujo;
+
+    console.log('📖 Dibujo abierto:', seleccionado);
+  }
+
+  // ============================================================
   // MATEMATICAS
   // ============================================================
 
@@ -1269,6 +1508,16 @@ export class CreatividadComponent {
     //(resultadoText as HTMLInputElement).value = ;
   }
 
+  escribirHistoriaDibujo() {
+    this.textoAEditar = this.dibujoModel.historia;
+    this.controlTextPlus='dibujo';
+    this.mostrarTextPlus.set(true);
+  }
+
+  //-===========================================================
+  //Matematicas
+  //============================================================
+
   generarJuegMatematic() {
     const operacionElegida = this.controlesTienda.get('juegoSeleccionada')?.value;
     console.log(operacionElegida)
@@ -1288,4 +1537,12 @@ export class CreatividadComponent {
     }
   }
 
+  generarAleatorioId():string{
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789';
+    const aleatorio = Array.from(
+      { length: 3 },
+      () => caracteres[Math.floor(Math.random() * caracteres.length)]
+    ).join('');
+    return aleatorio;
+  }
 }

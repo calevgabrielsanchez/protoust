@@ -105,10 +105,10 @@ export class LocalCsvService {
         return '';
       }
 
-      const text = String(value).replace(/\r?\n/g, ' ');
+      const text = String(value);
       const normalized = text.replace(/"/g, '""');
 
-      return /[",]/.test(text) ? `"${normalized}"` : normalized;
+      return /[",\r\n]/.test(text) ? `"${normalized}"` : normalized;
     };
 
     const lines = [headers.join(',')];
@@ -126,8 +126,7 @@ export class LocalCsvService {
       return [];
     }
 
-    const lines = csv
-      .split(/\r?\n/)
+    const lines = this.splitLineasCsv(csv)
       .map((line) => line.trim())
       .filter(Boolean);
 
@@ -159,6 +158,53 @@ export class LocalCsvService {
     } catch {
       return datos;
     }
+  }
+
+  private splitLineasCsv(csv: string): string[] {
+    const lineas: string[] = [];
+    let actual = '';
+    let inQuotes = false;
+    let i = 0;
+
+    while (i < csv.length) {
+      const char = csv[i];
+
+      if (char === '"') {
+        if (inQuotes && csv[i + 1] === '"') {
+          actual += '""';
+          i += 2;
+          continue;
+        }
+        inQuotes = !inQuotes;
+        actual += char;
+        i++;
+        continue;
+      }
+
+      // Un salto de línea dentro de un campo entre comillas NO separa filas
+      if (char === '\n' && !inQuotes) {
+        lineas.push(actual);
+        actual = '';
+        i++;
+        continue;
+      }
+
+      if (char === '\r' && !inQuotes) {
+        if (csv[i + 1] === '\n') {
+          i++;
+        }
+        lineas.push(actual);
+        actual = '';
+        i++;
+        continue;
+      }
+
+      actual += char;
+      i++;
+    }
+
+    lineas.push(actual);
+    return lineas;
   }
 
   private parseCsvLine(line: string): string[] {

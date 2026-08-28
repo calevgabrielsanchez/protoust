@@ -345,3 +345,21 @@ textarea:focus {
 .input-cell{
     margin-top: 10px;
 }
+
+.active{
+    color: #44e233;
+}
+
+button {
+  padding: 10px 18px;
+
+  border: none;
+  border-radius: 6px;
+
+  background: #222;
+  color: white;
+
+  font-size: 15px;
+
+  cursor: pointer;
+}

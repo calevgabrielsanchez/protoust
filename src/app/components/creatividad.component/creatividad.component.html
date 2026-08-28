@@ -19,23 +19,24 @@
                 <div class="row-universo">
                     <label>Menu:</label>
                     <div class="btn-group-four">
-                        <button class="square-btn light-txt" (click)="selectJuego('creatividad')"><fa-icon size="2x"
+                        <button class="square-btn light-txt" (click)="selectJuego('creatividad')"><fa-icon size="2x" [class.active]="creatividad"
                                 [icon]="faUserSecret"></fa-icon></button>
-                        <button class="square-btn light-txt" (click)="selectJuego('memoria')"><fa-icon size="2x"
+                        <button class="square-btn light-txt" (click)="selectJuego('memoria')"><fa-icon size="2x" [class.active]="memoriaB"
                                 [icon]="faBrain"></fa-icon></button>
-                        <button class="square-btn light-txt" (click)="selectJuego('matematicas')"><fa-icon size="2x"
+                        <button class="square-btn light-txt" (click)="selectJuego('matematicas')"><fa-icon size="2x" [class.active]="matematicas"
                                 [icon]="faBug"></fa-icon></button>
-                        <button class="square-btn light-txt" (click)="selectJuego('dibujo')"><fa-icon size="2x"
+                        <button class="square-btn light-txt" (click)="selectJuego('dibujo')"><fa-icon size="2x" [class.active]="dibujo"
                                 [icon]="faShrimp"></fa-icon></button>
                     </div>
                 </div>
                 <div id="creatividad-div" [hidden]="!creatividad">
                     <div class="row-universo">
                         <div class="btn-group-four">
-                            <button class="square-btn light-txt" (click)="onEscribirEjercicioCreatividad()"><fa-icon
-                                    size="2x" [icon]="faPenFancy"></fa-icon></button>
-                            <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faSave"></fa-icon></button>
-                            <button class="square-btn light-txt"><fa-icon size="2x"
+<button class="square-btn light-txt" (click)="onEscribirEjercicioCreatividad()"><fa-icon
+                                        size="2x" [icon]="faPenFancy"></fa-icon></button>
+                            <button class="square-btn light-txt" (click)="onGuardarCreatividad()"><fa-icon
+                                    size="2x" [icon]="faSave"></fa-icon></button>
+                            <button class="square-btn light-txt" (click)="onAbrirCreatividad()"><fa-icon size="2x"
                                     [icon]="faFolderOpen"></fa-icon></button>
                         </div>
                     </div>
@@ -120,11 +121,12 @@
                     </div>
                 </div>
 
-                <div [hidden]="!memoria">
+                <div [hidden]="!memoriaB">
                     <div class="row-universo">
                         <div class="btn-group-four">
-                            <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faSave"></fa-icon></button>
-                            <button class="square-btn light-txt"><fa-icon size="2x"
+                            <button class="square-btn light-txt" (click)="guardarMemoria()"><fa-icon size="2x"
+                                    [icon]="faSave"></fa-icon></button>
+                            <button class="square-btn light-txt" (click)="abrirMemoria()"><fa-icon size="2x"
                                     [icon]="faFolderOpen"></fa-icon></button>
                         </div>
                     </div>
@@ -186,10 +188,14 @@
                             <label><input type="checkbox" formControlName="resta"> resta</label>
                             <label><input type="checkbox" formControlName="multiplicacion"> multiplicacion</label>
                             <label><input type="checkbox" formControlName="divicion"> divicion</label>
-                            <label><input type="radio" name="juegoSeleccionada" formControlName="juegoSeleccionada" value="operaciones">Operaciones</label>
-                            <label><input type="radio" name="juegoSeleccionada" formControlName="juegoSeleccionada" value="porcentaje">Porcentaje</label>
-                            <label><input type="radio" name="juegoSeleccionada" formControlName="juegoSeleccionada" value="raiz">Raiz</label>
-                            <label><input type="radio" name="juegoSeleccionada" formControlName="juegoSeleccionada" value="completar">Completar</label>
+                            <label><input type="radio" name="juegoSeleccionada" formControlName="juegoSeleccionada"
+                                    value="operaciones">Operaciones</label>
+                            <label><input type="radio" name="juegoSeleccionada" formControlName="juegoSeleccionada"
+                                    value="porcentaje">Porcentaje</label>
+                            <label><input type="radio" name="juegoSeleccionada" formControlName="juegoSeleccionada"
+                                    value="raiz">Raiz</label>
+                            <label><input type="radio" name="juegoSeleccionada" formControlName="juegoSeleccionada"
+                                    value="completar">Completar</label>
                         </form>
                         <div class="controls">
                             <button (click)="generarJuegMatematic()" class="square-btn light-txt">
@@ -198,7 +204,7 @@
                             <button (click)="mostrarResultado()" class="square-btn light-txt">
                                 <fa-icon size="2x" [icon]="faEye"></fa-icon>
                             </button>
-                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -212,6 +218,18 @@
 
                             <button (click)="clearDrawing()" class="square-btn light-txt">
                                 <fa-icon size="2x" [icon]="faEraser"></fa-icon>
+                            </button>
+
+                            <button (click)="escribirHistoriaDibujo()" class="square-btn light-txt">
+                                <fa-icon size="2x" [icon]="faFileHalfDashed"></fa-icon>
+                            </button>
+
+                            <button (click)="guardarDibujo()" class="square-btn light-txt">
+                                <fa-icon size="2x" [icon]="faSave"></fa-icon>
+                            </button>
+
+                            <button (click)="abrirDibujo()" class="square-btn light-txt">
+                                <fa-icon size="2x" [icon]="faFolderOpen"></fa-icon>
                             </button>
                         </div>
 
@@ -231,9 +249,9 @@
         </main>
 
         <footer class="footer">
-            <button class="footer-btn">Juegos</button>
+            <button class="footer-btn active">Juegos</button>
             <button class="footer-btn" (click)="onClickCaleVRije()">CaleVRije</button>
-            <button class="footer-btn" (click)="onClickMente()">Personas</button>
+            <button class="footer-btn" (click)="onClickMente()">Mente</button>
         </footer>
 
     </div>
@@ -241,7 +259,7 @@
     <script src="./js/jquery-4.0.0.min.js.js"></script>
     <script src="./js/funciones.js"></script>
 
-    @if (mostrarTextPlus) {
+    @if (mostrarTextPlus()) {
     <app-text-plus [(textoContenido)]="textoAEditar" (cerrar)="cerrar()" (aceptar)="aceptar()"></app-text-plus>
     }
 

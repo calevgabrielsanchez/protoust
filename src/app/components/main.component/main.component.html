@@ -21,8 +21,8 @@
                     <div class="btn-group-four">
                         <button class="square-btn light-txt" (click)="abrirEditarText()"><fa-icon size="2x" [icon]="faFileHalfDashed"></fa-icon></button>
                         <button class="square-btn light-txt" ><fa-icon size="2x" [icon]="faSave"></fa-icon></button>
-                        <button class="square-btn light-txt" (click)="onMundoHistoria('mundo')"><fa-icon size="2x" [icon]="faEarthAmericas"></fa-icon></button>
-                        <button class="square-btn light-txt" (click)="onMundoHistoria('historia')"><fa-icon size="2x" [icon]="faScroll"></fa-icon></button>
+                        <button class="square-btn light-txt" [class.active]="mundo" (click)="onMundoHistoria('mundo')"><fa-icon size="2x" [icon]="faEarthAmericas"></fa-icon></button>
+                        <button class="square-btn light-txt" [class.active]="!mundo" (click)="onMundoHistoria('historia')"><fa-icon size="2x" [icon]="faScroll"></fa-icon></button>
                     </div>
                 </div>
 
@@ -59,8 +59,8 @@
                             <div class="row-full-select">
                                 <label for="opciones" id="label">Mundo:
                                 <button class="square-btn light-txt" (click)="onMundoShow()"><fa-icon size="2x" [icon]="faLevelDown"></fa-icon></button>
-                                <button class="square-btn light-txt" (click)="onCulturaShow()"><fa-icon size="2x" [icon]="faGlobe"></fa-icon></button>
-                                <button class="square-btn light-txt" (click)="onCreaturaShow()"><fa-icon size="2x" [icon]="faDragon"></fa-icon></button>
+                                <button class="square-btn light-txt" [class.active]="!culturaShow" (click)="onCulturaShow()"><fa-icon size="2x" [icon]="faGlobe"></fa-icon></button>
+                                <button class="square-btn light-txt" [class.active]="!creturaShow" (click)="onCreaturaShow()"><fa-icon size="2x" [icon]="faDragon"></fa-icon></button>
                                 </label>
                                 <div class="custom-select">
                                     <select name="mundo" id="mundo" (change)="onSelectMundo($event)">
@@ -484,8 +484,8 @@
 
         <footer class="footer">
             <button class="footer-btn" (click)="onClickCreatividad()">Juegos</button>
-            <button class="footer-btn">CaleVRije</button>
-            <button class="footer-btn" (click)="onClickMente()">Personas</button>
+            <button class="footer-btn active">CaleVRije</button>
+            <button class="footer-btn" (click)="onClickMente()">Mente</button>
         </footer>
 
     </div>

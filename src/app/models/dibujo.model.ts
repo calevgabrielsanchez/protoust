@@ -1,14 +1,12 @@
-export interface Valores {
+export interface Dibujo {
     id: string
     nombre: string
-    descripcion: string
-    frase: string
-
-    creatura: string
- 
     detalles: string
     imagen: string
-    
+
+    dibujo: string;
+    historia: string;
+
     updatedAt: number;
     _deleted: boolean;
 }

@@ -19,13 +19,13 @@
                 <div class="row-universo">
                     <label>Menu:</label>
                     <div class="btn-group-four">
-                        <button class="square-btn light-txt" (click)="onSelecionarSeccion('personalidad')"><fa-icon
+                        <button class="square-btn light-txt" (click)="onSelecionarSeccion('personalidad')"><fa-icon [class.active]="personalidadDiv"
                                 size="2x" [icon]="faUser"></fa-icon></button>
-                        <button class="square-btn light-txt" (click)="onSelecionarSeccion('valores')"><fa-icon size="2x"
+                        <button class="square-btn light-txt" (click)="onSelecionarSeccion('valores')"><fa-icon [class.active]="valoresDiv" size="2x"
                                 [icon]="faPersonChalkboard"></fa-icon></button>
-                        <button class="square-btn light-txt" (click)="onSelecionarSeccion('miedos')"><fa-icon size="2x"
+                        <button class="square-btn light-txt" (click)="onSelecionarSeccion('miedos')"><fa-icon [class.active]="miedosDiv" size="2x"
                                 [icon]="faPersonHiking"></fa-icon></button>
-                        <button class="square-btn light-txt" (click)="onSelecionarSeccion('emociones')"><fa-icon
+                        <button class="square-btn light-txt" (click)="onSelecionarSeccion('emociones')"><fa-icon [class.active]="emocionesDiv"
                                 size="2x" [icon]="faPersonDressBurst"></fa-icon></button>
                     </div>
                 </div>
@@ -275,9 +275,9 @@
         </main>
 
         <footer class="footer">
-            <button class="footer-btn" (click)="onClickCreatividad()">Creatividad</button>
+            <button class="footer-btn" (click)="onClickCreatividad()">Juegos</button>
             <button class="footer-btn" (click)="onClickCaleVRije()">CaleVRije</button>
-            <button class="footer-btn">Personas</button>
+            <button class="footer-btn active">Mente</button>
         </footer>
 
     </div>

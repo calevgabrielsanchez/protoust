@@ -43,7 +43,8 @@ faSquareXmark = faSquareXmark;
 
   convertirPergamino() {
     this.code = true
-    const lineas: string[] = this.textoArea.split(/\r?\n/);
+    if(this.textoArea!=''&&this.textoArea!=null&&this.textoArea!=undefined){
+const lineas: string[] = this.textoArea.split(/\r?\n/);
     let convertirdo = ""
     let cierre = ''
 
@@ -133,6 +134,8 @@ faSquareXmark = faSquareXmark;
       }
     });
     this.vistaPergamino = convertirdo
+    }
+    
   }
   convertirCodigo() {
     this.code = false

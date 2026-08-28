@@ -537,3 +537,7 @@ button:hover {
   padding: 8px;           /* Un poco de estética interior */
   box-sizing: border-box; /* Asegura que los paddings no rompan el ancho total */
 }
+
+.active{
+    color: #44e233;
+}
