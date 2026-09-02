@@ -3,13 +3,13 @@
     <div class="app-container">
 
         <header class="header">
-            <div class="header-btn-left"><fa-icon size="2x" [icon]="faDownload"></fa-icon></div>
-            <div class="header-btn-left"><fa-icon size="2x" [icon]="faSave"></fa-icon></div>
+            <div class="header-btn-left" (click)="onSincronizarBDToCSV()"><fa-icon size="2x" [icon]="faDownload"></fa-icon></div>
+            <div class="header-btn-left" (click)="onGuardarCambios()"><fa-icon size="2x" [icon]="faSave"></fa-icon></div>
             <div class="header-title">PROTOUST</div>
-            <div class="header-btn-right">
+            <div class="header-btn-right" (click)="cargarTablasCSV()">
                 <fa-icon size="2x" [icon]="faRefresh"></fa-icon>
             </div>
-            <div class="header-btn-right">
+            <div class="header-btn-right" (click)="onSincronizarCSVToBD()">
                 <fa-icon size="2x" [icon]="faUpload"></fa-icon>
             </div>
         </header>

@@ -43,8 +43,7 @@
                             <div class="col-actions">
                                 <button class="square-btn light-txt" (click)="onNuevoUniverso()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
                                 <button class="square-btn light-txt" (click)="onEliminarUniverso()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
-                                <button class="square-btn light-txt"
-                                   ><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onImagenDetalles(selectUniverso)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
                                 <button class="square-btn light-txt" (click)="onUniversoDetalles(selectUniverso)"
                                     ><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                             </div>
@@ -75,7 +74,7 @@
                                 <div class="col-actions">
                                     <button class="square-btn light-txt" (click)="onNuevoMundo()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
                                     <button class="square-btn light-txt" (click)="onEliminarMundo()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
-                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onImagenDetalles(selectMundo)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
                                     <button class="square-btn light-txt" (click)="onMundoDetalles(selectMundo)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                                 </div>
                             </div>
@@ -125,7 +124,7 @@
                                 <div class="col-actions">
                                     <button class="square-btn light-txt" (click)="onNuevocultura()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
                                     <button class="square-btn light-txt" (click)="onEliminarCultura()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
-                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onImagenDetalles(selectCultura)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
                                     <button class="square-btn light-txt" (click)="onCulturaDetalles(selectCultura)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                                 </div>
                             </div>
@@ -218,7 +217,7 @@
                                 <div class="col-actions">
                                     <button class="square-btn light-txt" (click)="onNuevoPersonaje()"><fa-icon size="2x" [icon]="faBaby"></fa-icon></button>
                                     <button class="square-btn light-txt" (click)="onEliminarPersonaje()"><fa-icon size="2x" [icon]="faSkullCrossbones"></fa-icon></button>
-                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onImagenDetalles(selectPersonaje)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
                                     <button class="square-btn light-txt" (click)="onPersonajeDetalles(selectPersonaje)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                                 </div>
                             </div>
@@ -310,7 +309,7 @@
                                 <div class="col-actions">
                                     <button class="square-btn light-txt" (click)="onNuevaCreatura()"><fa-icon size="2x" [icon]="faDragon"></fa-icon></button>
                                     <button class="square-btn light-txt" (click)="onEliminarCreatura()"><fa-icon size="2x" [icon]="faMeteor"></fa-icon></button>
-                                    <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onImagenDetalles(selectCreatura)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
                                     <button class="square-btn light-txt" (click)="onCreaturaDetalles(selectCreatura)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                                 </div>
                             </div>
@@ -412,7 +411,7 @@
                             <div class="col-actions">
                                 <button class="square-btn light-txt" (click)="onNuevoSaga()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
                                 <button class="square-btn light-txt" (click)="onEliminarSaga()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onImagenDetalles(selectSaga)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
                                 <button class="square-btn light-txt" (click)="onSagaDetalles(selectSaga)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                             </div>
                         </div>
@@ -434,7 +433,7 @@
                             <div class="col-actions">
                                 <button class="square-btn light-txt" (click)="onNuevoTomo()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
                                 <button class="square-btn light-txt" (click)="onEliminarTomo()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onImagenDetalles(selectTomo)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
                                 <button class="square-btn light-txt" (click)="onTomoDetalles(selectTomo)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                             </div>
                         </div>

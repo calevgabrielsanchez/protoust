@@ -1,7 +1,7 @@
 import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { Universo } from '../../models/universo.model';
 
-import { RxdbService } from '../../services/rxdb.service';
+import { SupabaseService } from '../../services/supabase.service';
 import { LocalCsvService } from '../../services/local-csv.service';
 import { CommonModule } from '@angular/common';
 import { Mundo } from '../../models/mundo.model';
@@ -70,7 +70,7 @@ faPersonDressBurst=faPersonDressBurst;
    */
   mundo: boolean = true;
 
-  public dbService = inject(RxdbService);
+  public dbService = inject(SupabaseService);
   public csvService = inject(LocalCsvService);
 
   mostrarTextPlus: boolean = false;
@@ -272,7 +272,22 @@ faPersonDressBurst=faPersonDressBurst;
 
   async onSincronizarCSVToBD() {
     await this.onGuardarCambios();
-    await this.dbService.importarTablasATrxDB(this.obtenerTablasCSV());
+
+    const enBD = await this.dbService.sincronizarDesdeSupabase();
+    if (!enBD) {
+      return;
+    }
+
+    const aSubir: Record<string, object[]> = {};
+
+    for (const [clave, filas] of Object.entries(this.obtenerTablasCSV())) {
+      aSubir[clave] = this.soloMasRecientes(
+        filas as { id?: string; updatedAt?: number }[],
+        enBD[clave] ?? []
+      );
+    }
+
+    await this.dbService.importarTablasATrxDB(aSubir);
     const resultado = await this.dbService.sincronizarConSupabase();
     alert(resultado
       ? 'Datos guardados y sincronizados con la nube correctamente.'
@@ -362,10 +377,50 @@ faPersonDressBurst=faPersonDressBurst;
     );
   }
 
-  private fusionar<T extends { id?: string }>(locales: T[], nube: T[]): T[] {
-    const idsLocales = new Set((locales || []).map(item => item?.id).filter(Boolean));
-    const faltantes = (nube || []).filter(item => !idsLocales.has(item.id));
-    return [...(locales || []), ...faltantes];
+  private fusionar<T extends { id?: string; updatedAt?: number }>(locales: T[], nube: T[]): T[] {
+    const mapaLocal = new Map<string, T>();
+
+    for (const item of locales || []) {
+      if (item?.id) {
+        mapaLocal.set(item.id, item);
+      }
+    }
+
+    for (const item of nube || []) {
+      if (!item?.id) {
+        continue;
+      }
+
+      const local = mapaLocal.get(item.id);
+      if (!local || (item.updatedAt ?? 0) > (local.updatedAt ?? 0)) {
+        mapaLocal.set(item.id, item);
+      }
+    }
+
+    return Array.from(mapaLocal.values());
+  }
+
+  private soloMasRecientes<T extends { id?: string; updatedAt?: number }>(locales: T[], enBD: T[]): T[] {
+    const porId = new Map<string, T>();
+
+    for (const fila of enBD ?? []) {
+      if (fila?.id) {
+        porId.set(fila.id, fila);
+      }
+    }
+
+    return (locales ?? []).filter(fila => {
+      if (!fila?.id) {
+        return false;
+      }
+
+      const bd = porId.get(fila.id);
+      if (!bd) {
+        return true;
+      }
+
+      return (fila.updatedAt ?? 0) > (bd.updatedAt ?? 0);
+    });
   }
 
   /*****************************************
@@ -785,6 +840,12 @@ faPersonDressBurst=faPersonDressBurst;
     console.log(contenido);
   }
 
+  async onImagenDetalles<T extends { imagen: string }>(elemento: T) {
+    const contenido = await this.abrirTextPlus(elemento.imagen);
+    elemento.imagen = contenido;
+    console.log(contenido);
+  }
+
   async onPersonajeDetalles(personaje: Personaje) {
     const contenido = await this.abrirTextPlus(personaje.detalles);
     personaje.detalles = contenido;
@@ -826,7 +887,7 @@ faPersonDressBurst=faPersonDressBurst;
     this.mundoShow = !this.mundoShow;
   }
 
-  culturaShow: boolean = true;
+  culturaShow: boolean = false;
   onCulturaShow() {
     this.culturaShow = !true;
     this.creturaShow = !false;

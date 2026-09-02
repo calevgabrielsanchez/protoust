@@ -17,6 +17,7 @@ import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { Memoria } from '../../models/memoria.modelo';
 import { LocalCsvService } from '../../services/local-csv.service';
+import { SupabaseService } from '../../services/supabase.service';
 
 import {
   AfterViewInit,
@@ -43,6 +44,7 @@ export class CreatividadComponent {
 
   http = inject(HttpClient);
   localCsv = inject(LocalCsvService);
+  dbService = inject(SupabaseService);
   cdr = inject(ChangeDetectorRef);
   memoria = {} as Memoria;
   dibujoModel = {} as Dibujo;
@@ -133,6 +135,7 @@ export class CreatividadComponent {
   ngOnInit() {
     this.obtenerEjercicio();
     this.obtenerArquetipo();
+    this.cargarTablasCSV();
     //----------------Memoria---------------
     this.crearTablaMemoria();
     //Crear el memoria
@@ -140,6 +143,133 @@ export class CreatividadComponent {
       this.historia.push('');
     }
 
+  }
+
+  async onSincronizarCSVToBD() {
+    await this.onGuardarCambios();
+
+    const tablas = await this.localCsv.loadAllTables<object>(['creatividad', 'memoria', 'dibujo']);
+
+    const enBD = await this.dbService.sincronizarDesdeSupabase();
+    if (!enBD) {
+      return;
+    }
+
+    const creatividad = this.soloMasRecientes((tablas['creatividad'] as Creatividad[] ?? []), enBD['creatividad'] as Creatividad[] ?? []);
+    const memorias = this.soloMasRecientes((tablas['memoria'] as Memoria[] ?? []), enBD['memoria'] as Memoria[] ?? []);
+    const dibujos = this.soloMasRecientes((tablas['dibujo'] as Dibujo[] ?? []), enBD['dibujo'] as Dibujo[] ?? []);
+
+    await this.dbService.importarTablasATrxDB({
+      creatividad,
+      memoria: memorias,
+      dibujo: dibujos
+    });
+
+    const resultado = await this.dbService.sincronizarConSupabase();
+    alert(resultado
+      ? 'Datos de creatividad guardados en local y sincronizados con Supabase correctamente.'
+      : 'No se pudieron sincronizar los datos de creatividad con Supabase.');
+  }
+
+  private soloMasRecientes<T extends { id?: string; updatedAt?: number }>(locales: T[], enBD: T[]): T[] {
+    const porId = new Map<string, T>();
+
+    for (const fila of enBD ?? []) {
+      if (fila?.id) {
+        porId.set(fila.id, fila);
+      }
+    }
+
+    return (locales ?? []).filter(fila => {
+      if (!fila?.id) {
+        return false;
+      }
+
+      const bd = porId.get(fila.id);
+      if (!bd) {
+        return true;
+      }
+
+      return (fila.updatedAt ?? 0) > (bd.updatedAt ?? 0);
+    });
+  }
+
+  async onSincronizarBDToCSV() {
+    const tablas = await this.dbService.sincronizarDesdeSupabase();
+    if (!tablas) {
+      return;
+    }
+
+    const locales = await this.localCsv.loadAllTables<object>(['creatividad', 'memoria', 'dibujo']);
+
+    const creatividad = this.fusionar(locales['creatividad'] as Creatividad[] ?? [], tablas['creatividad'] as Creatividad[] ?? []);
+    const memorias = this.fusionar(locales['memoria'] as Memoria[] ?? [], tablas['memoria'] as Memoria[] ?? []);
+    const dibujos = this.fusionar(locales['dibujo'] as Dibujo[] ?? [], tablas['dibujo'] as Dibujo[] ?? []);
+
+    await this.localCsv.saveAllTables<object>({
+      creatividad,
+      memoria: memorias,
+      dibujo: dibujos
+    });
+
+    await this.cargarTablasCSV();
+
+    alert('Datos descargados: solo se agregaron los registros de la nube que faltaban en tus archivos locales.');
+  }
+
+  private fusionar<T extends { id?: string; updatedAt?: number }>(locales: T[], nube: T[]): T[] {
+    const mapaLocal = new Map<string, T>();
+
+    for (const item of locales || []) {
+      if (item?.id) {
+        mapaLocal.set(item.id, item);
+      }
+    }
+
+    for (const item of nube || []) {
+      if (!item?.id) {
+        continue;
+      }
+
+      const local = mapaLocal.get(item.id);
+      if (!local || (item.updatedAt ?? 0) > (local.updatedAt ?? 0)) {
+        mapaLocal.set(item.id, item);
+      }
+    }
+
+    return Array.from(mapaLocal.values());
+  }
+
+  async cargarTablasCSV() {
+    const tablas = await this.localCsv.loadAllTables<object>(['creatividad', 'memoria', 'dibujo']);
+
+    const creatividad = tablas['creatividad'] ?? [];
+    const memorias = tablas['memoria'] ?? [];
+    const dibujos = tablas['dibujo'] ?? [];
+
+    if (creatividad.length > 0) {
+      this.creatividadModel = creatividad[creatividad.length - 1] as Creatividad;
+    }
+
+    if (memorias.length > 0) {
+      this.memoria = memorias[memorias.length - 1] as Memoria;
+    }
+
+    if (dibujos.length > 0) {
+      this.dibujoModel = dibujos[dibujos.length - 1] as Dibujo;
+    }
+  }
+
+  async onGuardarCambios() {
+    const creatividad = await this.localCsv.loadTable<Creatividad>('creatividad');
+    const memorias = await this.localCsv.loadTable<Memoria>('memoria');
+    const dibujos = await this.localCsv.loadTable<Dibujo>('dibujo');
+
+    await Promise.all([
+      this.localCsv.saveTable('creatividad', creatividad),
+      this.localCsv.saveTable('memoria', memorias),
+      this.localCsv.saveTable('dibujo', dibujos),
+    ]);
   }
 
   cerrar() {
@@ -1258,6 +1388,7 @@ export class CreatividadComponent {
     const aleatorio = this.generarAleatorioId();
 
     this.dibujoModel.id = nombre + '_' + aleatorio;
+    this.dibujoModel.nombre = nombre;
     this.dibujoModel.dibujo = canvas.toDataURL('image/png');
     this.dibujoModel.updatedAt = Date.now();
     this.dibujoModel._deleted = false;
