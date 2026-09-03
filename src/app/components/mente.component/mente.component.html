@@ -3,13 +3,13 @@
     <div class="app-container">
 
         <header class="header">
-            <div class="header-btn-left"><fa-icon size="2x" [icon]="faDownload"></fa-icon></div>
-            <div class="header-btn-left"><fa-icon size="2x" [icon]="faSave"></fa-icon></div>
-            <div class="header-title">PROTOUST</div>
-            <div class="header-btn-right">
+            <div class="header-btn-left" (click)="onSincronizarBDToCSV()"><fa-icon size="2x" [icon]="faDownload"></fa-icon></div>
+            <div class="header-btn-left" (click)="onGuardarCambios()"><fa-icon size="2x" [icon]="faSave"></fa-icon></div>
+            <div class="header-title" (click)="firstSincCSVToSupabase()">PROTOUST</div>
+            <div class="header-btn-right" (click)="cargarTablasCSV()">
                 <fa-icon size="2x" [icon]="faRefresh"></fa-icon>
             </div>
-            <div class="header-btn-right">
+            <div class="header-btn-right" (click)="onSincronizarCSVToBD()">
                 <fa-icon size="2x" [icon]="faUpload"></fa-icon>
             </div>
         </header>
@@ -36,25 +36,22 @@
                         <div class="row-full-select">
                             <label>Personalidad:</label>
                             <div class="custom-select">
-                                <select name="personalidad" id="personalidad" (change)="onSelectPersonalidad($event)">
-                                    <option value='0'>Elige...</option>
-                                    <!--   @for (personalidad of (personalidades); track personalidad.id) {
-                                    <option value='{{personalidad.id}}'>{{personalidad.nombre}} @if
-                                        (personalidad._deleted) { - }</option>
-                                    } @empty {
-                                    <option value='0'>-Vacio-</option>
-                                    }-->
+                                <select name="personalidadSelect" id="personalidadSelect" [ngModel]="personalidadSeleccionada.mbti" (change)="onSelectPersonalidad($event)">
+                                    <option value="0">Elige...</option>
+                                    @for (item of personalidades(); track item.id) {
+                                        <option [value]="item.mbti">{{ item.colorForma }} - {{ item.mbti }}</option>
+                                    }
                                 </select>
                             </div>
                             <div class="col-actions">
-                                <button class="square-btn light-txt"><fa-icon size="2x"
+                                <button class="square-btn light-txt" (click)="onNuevaPersonalidad()"><fa-icon size="2x"
                                         [icon]="faSquarePlus"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x"
+                                <button class="square-btn light-txt" (click)="onEliminarPersonalidad()"><fa-icon size="2x"
                                         [icon]="faTrashCan"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x"
+                                <button class="square-btn light-txt" (click)="onPersonalidadImagen()"><fa-icon size="2x"
                                         [icon]="faImage"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x"
-                                        [icon]="faCircleInfo"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onPersonalidadDetalles()"
+                                    ><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                             </div>
                         </div>
                         <div>
@@ -132,25 +129,22 @@
                         <div class="row-full-select">
                             <label>Valores:</label>
                             <div class="custom-select">
-                                <select name="personalidad" id="personalidad" (change)="onSelectPersonalidad($event)">
-                                    <option value='0'>Elige...</option>
-                                    <!--   @for (personalidad of (personalidades); track personalidad.id) {
-                                    <option value='{{personalidad.id}}'>{{personalidad.nombre}} @if
-                                        (personalidad._deleted) { - }</option>
-                                    } @empty {
-                                    <option value='0'>-Vacio-</option>
-                                    }-->
+                                <select name="valorSelect" id="valorSelect" [ngModel]="valoresSeleccionado.nombre" (change)="onSelectValor($event)">
+                                    <option value="0">Elige...</option>
+                                    @for (valor of valoresOptions(); track valor) {
+                                        <option [value]="valor">{{ valor }}</option>
+                                    }
                                 </select>
                             </div>
                             <div class="col-actions">
-                                <button class="square-btn light-txt"><fa-icon size="2x"
+                                <button class="square-btn light-txt" (click)="onNuevoValor()"><fa-icon size="2x"
                                         [icon]="faSquarePlus"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x"
+                                <button class="square-btn light-txt" (click)="onEliminarValor()"><fa-icon size="2x"
                                         [icon]="faTrashCan"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x"
+                                <button class="square-btn light-txt" (click)="onValorImagen()"><fa-icon size="2x"
                                         [icon]="faImage"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x"
-                                        [icon]="faCircleInfo"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onValorDetalles()"
+                                    ><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                             </div>
                         </div>
                         <div>
@@ -179,25 +173,22 @@
                         <div class="row-full-select">
                             <label>Miedos:</label>
                             <div class="custom-select">
-                                <select name="personalidad" id="personalidad" (change)="onSelectPersonalidad($event)">
-                                    <option value='0'>Elige...</option>
-                                    <!--   @for (personalidad of (personalidades); track personalidad.id) {
-                                    <option value='{{personalidad.id}}'>{{personalidad.nombre}} @if
-                                        (personalidad._deleted) { - }</option>
-                                    } @empty {
-                                    <option value='0'>-Vacio-</option>
-                                    }-->
+                                <select name="miedoSelect" id="miedoSelect" [ngModel]="miedosSeleccionado.nombre" (change)="onSelectMiedo($event)">
+                                    <option value="0">Elige...</option>
+                                    @for (miedo of miedosOptions(); track miedo) {
+                                        <option [value]="miedo">{{ miedo }}</option>
+                                    }
                                 </select>
                             </div>
                             <div class="col-actions">
-                                <button class="square-btn light-txt"><fa-icon size="2x"
+                                <button class="square-btn light-txt" (click)="onNuevoMiedo()"><fa-icon size="2x"
                                         [icon]="faSquarePlus"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x"
+                                <button class="square-btn light-txt" (click)="onEliminarMiedo()"><fa-icon size="2x"
                                         [icon]="faTrashCan"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x"
+                                <button class="square-btn light-txt" (click)="onMiedoImagen()"><fa-icon size="2x"
                                         [icon]="faImage"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x"
-                                        [icon]="faCircleInfo"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onMiedoDetalles()"
+                                    ><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                             </div>
                         </div>
                         <div>
@@ -227,25 +218,22 @@
                         <div class="row-full-select">
                             <label>Emociones:</label>
                             <div class="custom-select">
-                                <select name="personalidad" id="personalidad" (change)="onSelectPersonalidad($event)">
-                                    <option value='0'>Elige...</option>
-                                    <!--   @for (personalidad of (personalidades); track personalidad.id) {
-                                    <option value='{{personalidad.id}}'>{{personalidad.nombre}} @if
-                                        (personalidad._deleted) { - }</option>
-                                    } @empty {
-                                    <option value='0'>-Vacio-</option>
-                                    }-->
+                                <select name="emocionSelect" id="emocionSelect" [ngModel]="emocionesSeleccionada.nombre" (change)="onSelectEmocion($event)">
+                                    <option value="0">Elige...</option>
+                                    @for (emocion of emocionesOptions(); track emocion) {
+                                        <option [value]="emocion">{{ emocion }}</option>
+                                    }
                                 </select>
                             </div>
                             <div class="col-actions">
-                                <button class="square-btn light-txt"><fa-icon size="2x"
+                                <button class="square-btn light-txt" (click)="onNuevaEmocion()"><fa-icon size="2x"
                                         [icon]="faSquarePlus"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x"
+                                <button class="square-btn light-txt" (click)="onEliminarEmocion()"><fa-icon size="2x"
                                         [icon]="faTrashCan"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x"
+                                <button class="square-btn light-txt" (click)="onEmocionImagen()"><fa-icon size="2x"
                                         [icon]="faImage"></fa-icon></button>
-                                <button class="square-btn light-txt"><fa-icon size="2x"
-                                        [icon]="faCircleInfo"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onEmocionDetalles()"
+                                    ><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
                             </div>
                         </div>
                         <div>

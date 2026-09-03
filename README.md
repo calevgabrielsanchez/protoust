@@ -62,3 +62,10 @@ For more information on using the Angular CLI, including detailed command refere
 ng build --configuration production
 npx cap sync android
 npx cap copy android && export ANDROID_HOME=$HOME/Android/Sdk && export ANDROID_SDK_ROOT=$HOME/Android/Sdk && npx cap run android
+
+## persimos a las tablas
+CREATE POLICY "Permitir lectura y escritura a usuarios autenticados"
+ON memoria
+FOR ALL
+USING (true)
+WITH CHECK (true);

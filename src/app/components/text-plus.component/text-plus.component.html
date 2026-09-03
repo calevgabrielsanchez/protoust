@@ -7,6 +7,9 @@
         <button (click)="guardarYAceptar()"><fa-icon size="2x" [icon]="faSquareCheck"></fa-icon></button>
     </div>
     <div class="grupo-derecho">
+        <button (click)="onHelp()"><fa-icon size="2x" [icon]="faCircleQuestion"></fa-icon></button>
+    </div>
+    <div class="grupo-derecho">
         <button (click)="cerrar.emit()"><fa-icon size="2x" [icon]="faSquareXmark"></fa-icon></button>
     </div>
 </div>
@@ -14,7 +17,8 @@
   class="cuadro-completo" 
   [class.hide]="code"
   placeholder="Escribe aquí..."
-  [(ngModel)]="textoArea">
+  [(ngModel)]="textoArea"
+  (ngModelChange)="actualizarVistaPergamino()">
 </textarea>
 
 <div 
