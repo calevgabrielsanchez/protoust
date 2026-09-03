@@ -6,7 +6,7 @@ import {
   faPenFancy,
   faDownload, faUpload, faRefresh, faBrain, faBug, faUserSecret, faShrimp, faArrowsSpin,
   faEye, faFolderOpen,
-  faBookOpen, faEraser, faTextHeight
+  faBookOpen, faEraser, faTextHeight, faBurger, faSquareXmark
 } from '@fortawesome/free-solid-svg-icons';
 import { TextPlusComponent } from '../text-plus.component/text-plus.component';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
@@ -77,10 +77,13 @@ export class CreatividadComponent {
   faBookOpen = faBookOpen;
   faEraser = faEraser;
   faTextHeight = faTextHeight;
+  faBurger = faBurger;
+  faSquareXmark = faSquareXmark;
   faFolderOpen = faFolderOpen;
 
   mostrarTextPlus = signal(false);
   textoAEditar: string = "";
+  mostrarMenuModal: boolean = false;
 
   palabras = signal<any[]>([]);
   datosConvertidos: any[] = [];
@@ -310,6 +313,10 @@ export class CreatividadComponent {
     // this.textoAEditar = this.textareaSeleccionada()?.value || '';
     this.mostrarTextPlus.set(true);
     this.cdr.detectChanges();
+  }
+
+  mostrarMenu() {
+    this.mostrarMenuModal = !this.mostrarMenuModal;
   }
 
   onClickCaleVRije() {

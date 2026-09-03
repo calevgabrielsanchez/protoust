@@ -3,14 +3,10 @@
     <div class="app-container">
 
         <header class="header">
-            <div class="header-btn-left" (click)="onSincronizarBDToCSV()"><fa-icon size="2x" [icon]="faDownload"></fa-icon></div>
-            <div class="header-btn-left" (click)="onGuardarCambios()"><fa-icon size="2x" [icon]="faSave"></fa-icon></div>
+            <div class="header-btn-left" (click)="mostrarMenu()"><fa-icon size="2x" [icon]="faBurger"></fa-icon></div>
             <div class="header-title">PROTOUST</div>
-            <div class="header-btn-right" (click)="cargarTablasCSV()">
-               <fa-icon size="2x" [icon]="faRefresh"></fa-icon>
-            </div>
-            <div class="header-btn-right" (click)="onSincronizarCSVToBD()">
-               <fa-icon size="2x" [icon]="faUpload"></fa-icon>
+            <div class="header-btn-right" (click)="onGuardarCambios()">
+                <fa-icon size="2x" [icon]="faSave"></fa-icon>
             </div>
         </header>
 
@@ -19,12 +15,46 @@
                 <div class="row-universo">
                     <label>Menu:</label>
                     <div class="btn-group-four">
-                        <button class="square-btn light-txt" (click)="abrirEditarText()"><fa-icon size="2x" [icon]="faFileHalfDashed"></fa-icon></button>
-                        <button class="square-btn light-txt" ><fa-icon size="2x" [icon]="faSave"></fa-icon></button>
-                        <button class="square-btn light-txt" [class.active]="mundo" (click)="onMundoHistoria('mundo')"><fa-icon size="2x" [icon]="faEarthAmericas"></fa-icon></button>
-                        <button class="square-btn light-txt" [class.active]="!mundo" (click)="onMundoHistoria('historia')"><fa-icon size="2x" [icon]="faScroll"></fa-icon></button>
+                        <button class="square-btn light-txt" (click)="abrirEditarText()"><fa-icon size="2x"
+                                [icon]="faFileHalfDashed"></fa-icon></button>
+                        <button class="square-btn light-txt"><fa-icon size="2x" [icon]="faSave"></fa-icon></button>
+                        <button class="square-btn light-txt" [class.active]="mundo"
+                            (click)="onMundoHistoria('mundo')"><fa-icon size="2x"
+                                [icon]="faEarthAmericas"></fa-icon></button>
+                        <button class="square-btn light-txt" [class.active]="!mundo"
+                            (click)="onMundoHistoria('historia')"><fa-icon size="2x"
+                                [icon]="faScroll"></fa-icon></button>
                     </div>
                 </div>
+
+                @if (mostrarMenuModal) {
+                <div class="menu-overlay" (click)="mostrarMenu()">
+                    <div class="menu-modal" (click)="$event.stopPropagation()">
+                        <div class="menu-header">
+                            <span>Menú</span>
+                            <button class="menu-cerrar" (click)="mostrarMenu()"><fa-icon size="2x"
+                                    [icon]="faSquareXmark"></fa-icon></button>
+                        </div>
+                        <nav class="menu-lista">
+                            <button class="menu-opcion active">CaleVRije</button>
+                            <button class="menu-opcion" (click)="onClickCreatividad()">Juegos</button>
+                            <button class="menu-opcion" (click)="onClickMente()">Mente</button>
+                        </nav>
+
+                        <nav class="menu-lista">
+                            <button class="menu-opcion" (click)="onSincronizarBDToCSV()"><fa-icon size="2x"
+                                    [icon]="faDownload"></fa-icon> Descargar de la Base</button>
+                            <button class="menu-opcion" (click)="onGuardarCambios()"><fa-icon size="2x"
+                                    [icon]="faSave"></fa-icon> Guardar en CSV local</button>
+                            <button class="menu-opcion" (click)="cargarTablasCSV()"><fa-icon size="2x"
+                                    [icon]="faRefresh"></fa-icon> Actualizar desde CSV local</button>
+                            <button class="menu-opcion" (click)="onSincronizarCSVToBD()"><fa-icon size="2x"
+                                    [icon]="faUpload"></fa-icon> Subir a la base</button>
+                        </nav>
+
+                    </div>
+                </div>
+                }
 
                 <div class="control-panel-v2">
                     <div class="section-block">
@@ -41,11 +71,15 @@
                                 </select>
                             </div>
                             <div class="col-actions">
-                                <button class="square-btn light-txt" (click)="onNuevoUniverso()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
-                                <button class="square-btn light-txt" (click)="onEliminarUniverso()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
-                                <button class="square-btn light-txt" (click)="onImagenDetalles(selectUniverso)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                <button class="square-btn light-txt" (click)="onUniversoDetalles(selectUniverso)"
-                                    ><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onNuevoUniverso()"><fa-icon size="2x"
+                                        [icon]="faSquarePlus"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onEliminarUniverso()"><fa-icon size="2x"
+                                        [icon]="faTrashCan"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onImagenDetalles(selectUniverso)"><fa-icon
+                                        size="2x" [icon]="faImage"></fa-icon></button>
+                                <button class="square-btn light-txt"
+                                    (click)="onUniversoDetalles(selectUniverso)"><fa-icon size="2x"
+                                        [icon]="faCircleInfo"></fa-icon></button>
                             </div>
                         </div>
                     </div>
@@ -57,25 +91,36 @@
                         <div class="section-block">
                             <div class="row-full-select">
                                 <label for="opciones" id="label">Mundo:
-                                <button class="square-btn light-txt" (click)="onMundoShow()"><fa-icon size="2x" [icon]="faLevelDown"></fa-icon></button>
-                                <button class="square-btn light-txt" [class.active]="!culturaShow" (click)="onCulturaShow()"><fa-icon size="2x" [icon]="faGlobe"></fa-icon></button>
-                                <button class="square-btn light-txt" [class.active]="!creturaShow" (click)="onCreaturaShow()"><fa-icon size="2x" [icon]="faDragon"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onMundoShow()"><fa-icon size="2x"
+                                            [icon]="faLevelDown"></fa-icon></button>
+                                    <button class="square-btn light-txt" [class.active]="!culturaShow"
+                                        (click)="onCulturaShow()"><fa-icon size="2x"
+                                            [icon]="faGlobe"></fa-icon></button>
+                                    <button class="square-btn light-txt" [class.active]="!creturaShow"
+                                        (click)="onCreaturaShow()"><fa-icon size="2x"
+                                            [icon]="faDragon"></fa-icon></button>
                                 </label>
                                 <div class="custom-select">
                                     <select name="mundo" id="mundo" (change)="onSelectMundo($event)">
                                         <option value='0'>Elige...</option>
                                         @for (mundo of (mundosFiltrados); track mundo.id) {
-                                        <option value='{{mundo.id}}'>{{mundo.nombre}} @if (mundo._deleted) { - }</option>
+                                        <option value='{{mundo.id}}'>{{mundo.nombre}} @if (mundo._deleted) { - }
+                                        </option>
                                         } @empty {
                                         <option value='0'>-Vacio-</option>
                                         }
                                     </select>
                                 </div>
                                 <div class="col-actions">
-                                    <button class="square-btn light-txt" (click)="onNuevoMundo()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
-                                    <button class="square-btn light-txt" (click)="onEliminarMundo()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
-                                    <button class="square-btn light-txt" (click)="onImagenDetalles(selectMundo)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                    <button class="square-btn light-txt" (click)="onMundoDetalles(selectMundo)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onNuevoMundo()"><fa-icon size="2x"
+                                            [icon]="faSquarePlus"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onEliminarMundo()"><fa-icon size="2x"
+                                            [icon]="faTrashCan"></fa-icon></button>
+                                    <button class="square-btn light-txt"
+                                        (click)="onImagenDetalles(selectMundo)"><fa-icon size="2x"
+                                            [icon]="faImage"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onMundoDetalles(selectMundo)"><fa-icon
+                                            size="2x" [icon]="faCircleInfo"></fa-icon></button>
                                 </div>
                             </div>
                             <div class="grid-three-cols" [ngClass]="{'hidden': !mundoShow}">
@@ -122,10 +167,16 @@
                                     </select>
                                 </div>
                                 <div class="col-actions">
-                                    <button class="square-btn light-txt" (click)="onNuevocultura()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
-                                    <button class="square-btn light-txt" (click)="onEliminarCultura()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
-                                    <button class="square-btn light-txt" (click)="onImagenDetalles(selectCultura)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                    <button class="square-btn light-txt" (click)="onCulturaDetalles(selectCultura)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onNuevocultura()"><fa-icon size="2x"
+                                            [icon]="faSquarePlus"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onEliminarCultura()"><fa-icon
+                                            size="2x" [icon]="faTrashCan"></fa-icon></button>
+                                    <button class="square-btn light-txt"
+                                        (click)="onImagenDetalles(selectCultura)"><fa-icon size="2x"
+                                            [icon]="faImage"></fa-icon></button>
+                                    <button class="square-btn light-txt"
+                                        (click)="onCulturaDetalles(selectCultura)"><fa-icon size="2x"
+                                            [icon]="faCircleInfo"></fa-icon></button>
                                 </div>
                             </div>
                             <div class="grid-three-cols">
@@ -215,10 +266,16 @@
 
                                 </div>
                                 <div class="col-actions">
-                                    <button class="square-btn light-txt" (click)="onNuevoPersonaje()"><fa-icon size="2x" [icon]="faBaby"></fa-icon></button>
-                                    <button class="square-btn light-txt" (click)="onEliminarPersonaje()"><fa-icon size="2x" [icon]="faSkullCrossbones"></fa-icon></button>
-                                    <button class="square-btn light-txt" (click)="onImagenDetalles(selectPersonaje)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                    <button class="square-btn light-txt" (click)="onPersonajeDetalles(selectPersonaje)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onNuevoPersonaje()"><fa-icon size="2x"
+                                            [icon]="faBaby"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onEliminarPersonaje()"><fa-icon
+                                            size="2x" [icon]="faSkullCrossbones"></fa-icon></button>
+                                    <button class="square-btn light-txt"
+                                        (click)="onImagenDetalles(selectPersonaje)"><fa-icon size="2x"
+                                            [icon]="faImage"></fa-icon></button>
+                                    <button class="square-btn light-txt"
+                                        (click)="onPersonajeDetalles(selectPersonaje)"><fa-icon size="2x"
+                                            [icon]="faCircleInfo"></fa-icon></button>
                                 </div>
                             </div>
                             <div class="grid-three-cols">
@@ -307,10 +364,16 @@
                                     </select>
                                 </div>
                                 <div class="col-actions">
-                                    <button class="square-btn light-txt" (click)="onNuevaCreatura()"><fa-icon size="2x" [icon]="faDragon"></fa-icon></button>
-                                    <button class="square-btn light-txt" (click)="onEliminarCreatura()"><fa-icon size="2x" [icon]="faMeteor"></fa-icon></button>
-                                    <button class="square-btn light-txt" (click)="onImagenDetalles(selectCreatura)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                    <button class="square-btn light-txt" (click)="onCreaturaDetalles(selectCreatura)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onNuevaCreatura()"><fa-icon size="2x"
+                                            [icon]="faDragon"></fa-icon></button>
+                                    <button class="square-btn light-txt" (click)="onEliminarCreatura()"><fa-icon
+                                            size="2x" [icon]="faMeteor"></fa-icon></button>
+                                    <button class="square-btn light-txt"
+                                        (click)="onImagenDetalles(selectCreatura)"><fa-icon size="2x"
+                                            [icon]="faImage"></fa-icon></button>
+                                    <button class="square-btn light-txt"
+                                        (click)="onCreaturaDetalles(selectCreatura)"><fa-icon size="2x"
+                                            [icon]="faCircleInfo"></fa-icon></button>
                                 </div>
                             </div>
 
@@ -409,10 +472,14 @@
                                 </select>
                             </div>
                             <div class="col-actions">
-                                <button class="square-btn light-txt" (click)="onNuevoSaga()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
-                                <button class="square-btn light-txt" (click)="onEliminarSaga()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
-                                <button class="square-btn light-txt" (click)="onImagenDetalles(selectSaga)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                <button class="square-btn light-txt" (click)="onSagaDetalles(selectSaga)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onNuevoSaga()"><fa-icon size="2x"
+                                        [icon]="faSquarePlus"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onEliminarSaga()"><fa-icon size="2x"
+                                        [icon]="faTrashCan"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onImagenDetalles(selectSaga)"><fa-icon
+                                        size="2x" [icon]="faImage"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onSagaDetalles(selectSaga)"><fa-icon
+                                        size="2x" [icon]="faCircleInfo"></fa-icon></button>
                             </div>
                         </div>
                     </div>
@@ -431,10 +498,14 @@
                                 </select>
                             </div>
                             <div class="col-actions">
-                                <button class="square-btn light-txt" (click)="onNuevoTomo()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
-                                <button class="square-btn light-txt" (click)="onEliminarTomo()"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
-                                <button class="square-btn light-txt" (click)="onImagenDetalles(selectTomo)"><fa-icon size="2x" [icon]="faImage"></fa-icon></button>
-                                <button class="square-btn light-txt" (click)="onTomoDetalles(selectTomo)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onNuevoTomo()"><fa-icon size="2x"
+                                        [icon]="faSquarePlus"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onEliminarTomo()"><fa-icon size="2x"
+                                        [icon]="faTrashCan"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onImagenDetalles(selectTomo)"><fa-icon
+                                        size="2x" [icon]="faImage"></fa-icon></button>
+                                <button class="square-btn light-txt" (click)="onTomoDetalles(selectTomo)"><fa-icon
+                                        size="2x" [icon]="faCircleInfo"></fa-icon></button>
                             </div>
                         </div>
                     </div>
@@ -454,11 +525,16 @@
                                     <td class="col-num">{{i + 1}}</td>
                                     <td class="col-text">{{indice.nombre}}</td>
                                     <td class="col-actions">
-                                        <button class="square-btn light-txt" (click)="onEliminarIndice(indice)"><fa-icon size="2x" [icon]="faTrashCan"></fa-icon></button>
-                                        <button class="square-btn light-txt" (click)="onIndiceDetalles(indice)"><fa-icon size="2x" [icon]="faCircleInfo"></fa-icon></button>
-                                        <button class="square-btn light-txt" (click)="onCambiarTituloIndice(indice)"><fa-icon size="2x" [icon]="faPenFancy"></fa-icon></button>
+                                        <button class="square-btn light-txt" (click)="onEliminarIndice(indice)"><fa-icon
+                                                size="2x" [icon]="faTrashCan"></fa-icon></button>
+                                        <button class="square-btn light-txt" (click)="onIndiceDetalles(indice)"><fa-icon
+                                                size="2x" [icon]="faCircleInfo"></fa-icon></button>
                                         <button class="square-btn light-txt"
-                                            (click)="onAddContenidoIndice(indice.id, indice.nombre,i)"><fa-icon size="2x" [icon]="faFileHalfDashed"></fa-icon></button>
+                                            (click)="onCambiarTituloIndice(indice)"><fa-icon size="2x"
+                                                [icon]="faPenFancy"></fa-icon></button>
+                                        <button class="square-btn light-txt"
+                                            (click)="onAddContenidoIndice(indice.id, indice.nombre,i)"><fa-icon
+                                                size="2x" [icon]="faFileHalfDashed"></fa-icon></button>
                                     </td>
                                 </tr>
                                 }
@@ -467,26 +543,16 @@
                                 <tr>
                                     <td colspan="2" class="col-text">Control</td>
                                     <td class="col-actions">
-                                        <button class="square-btn light-txt"
-                                            (click)="onNuevoIndice()"><fa-icon size="2x" [icon]="faSquarePlus"></fa-icon></button>
+                                        <button class="square-btn light-txt" (click)="onNuevoIndice()"><fa-icon
+                                                size="2x" [icon]="faSquarePlus"></fa-icon></button>
                                     </td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
                 </div>
-
             </div>
-
-
         </main>
-
-        <footer class="footer">
-            <button class="footer-btn" (click)="onClickCreatividad()">Juegos</button>
-            <button class="footer-btn active">CaleVRije</button>
-            <button class="footer-btn" (click)="onClickMente()">Mente</button>
-        </footer>
-
     </div>
 
     <script src="./js/jquery-4.0.0.min.js.js"></script>

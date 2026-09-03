@@ -2,7 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import {
   faSave, faFileHalfDashed, faGlobe, faBook, faEarthAmericas, faScroll, faImage,
   faCircleInfo, faSquarePlus, faBaby, faDragon, faMeteor, faSkullCrossbones, faTrashCan, faPenFancy,
-  faDownload, faUpload, faRefresh, faUser, faPersonChalkboard, faPersonHiking, faPersonDressBurst
+  faDownload, faUpload, faRefresh, faUser, faPersonChalkboard, faPersonHiking, faPersonDressBurst,
+  faBurger, faSquareXmark
 } from '@fortawesome/free-solid-svg-icons';
 import { TextPlusComponent } from '../text-plus.component/text-plus.component';
 import { Personalidad } from '../../models/personalidad.model';
@@ -47,8 +48,11 @@ export class MenteComponent {
   faPersonChalkboard = faPersonChalkboard;
   faPersonHiking = faPersonHiking;
   faPersonDressBurst = faPersonDressBurst;
+  faBurger = faBurger;
+  faSquareXmark = faSquareXmark;
 
   mostrarTextPlus: boolean = false;
+  mostrarMenuModal: boolean = false;
   textoAEditar: string = "";
   private textPlusPromiseResolver: ((value: string) => void) | null = null;
 
@@ -619,6 +623,10 @@ alert('Cambios guardados en CSV local correctamente.');
     } else {
       alert('No hay una emoción seleccionada para eliminar.');
     }
+  }
+
+  mostrarMenu() {
+    this.mostrarMenuModal = !this.mostrarMenuModal;
   }
 
   onClickCaleVRije() {

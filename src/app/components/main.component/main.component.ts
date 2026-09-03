@@ -28,7 +28,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faSave, faFileHalfDashed, faGlobe, faBook, faEarthAmericas, faScroll, faImage,
   faCircleInfo, faSquarePlus, faBaby, faDragon, faMeteor, faSkullCrossbones, faTrashCan, faPenFancy,
-  faDownload, faUpload, faRefresh, faLevelDown, faPersonDressBurst
+  faDownload, faUpload, faRefresh, faLevelDown, faPersonDressBurst, faBurger, faSquareXmark
 } from '@fortawesome/free-solid-svg-icons';
 
 
@@ -62,8 +62,9 @@ export class MainComponent {
   faUpload = faUpload;
   faRefresh = faRefresh;
   faLevelDown = faLevelDown;
-faPersonDressBurst=faPersonDressBurst;
-
+  faPersonDressBurst = faPersonDressBurst;
+  faBurger = faBurger;
+  faSquareXmark = faSquareXmark;
   /*****************************************
    * Variables Internas
    * ***************************************
@@ -72,6 +73,8 @@ faPersonDressBurst=faPersonDressBurst;
 
   public dbService = inject(SupabaseService);
   public csvService = inject(LocalCsvService);
+
+  mostrarMenuModal: boolean = false;
 
   mostrarTextPlus: boolean = false;
   textoAEditar: string = "";
@@ -579,7 +582,7 @@ faPersonDressBurst=faPersonDressBurst;
       return;
     }
 
-    this.selectUniverso = this.dbService.universo$.getValue().find(u => u.id === idCapturado) ?? this.vacioUniverso;
+    this.selectUniverso = this.todosUniverso().find(u => u.id === idCapturado) ?? this.vacioUniverso;
 
     this.llenarSaga()
     this.llenarMundo()
@@ -1064,6 +1067,10 @@ faPersonDressBurst=faPersonDressBurst;
     this.textoAEditar = this.textareaSeleccionada()?.value || '';
     this.mostrarTextPlus = true;
   }
+  mostrarMenu() {
+    this.mostrarMenuModal = !this.mostrarMenuModal;
+  }
+
   onClickCreatividad() {
     window.location.href = '/creatividad';
   }
